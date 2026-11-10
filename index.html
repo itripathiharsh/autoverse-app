@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="AutoVerse turns any Android car head unit into one fast cockpit: live night map with turn-by-turn in Hindi or English, music, speed and car tools. Free, no Android Auto.">
+<meta name="theme-color" content="#06080B">
+<meta property="og:title" content="AutoVerse: your car screen, finally a cockpit">
+<meta property="og:description" content="Free car launcher for Android head units. Night map, turn-by-turn in Hindi, music, speed limits, car tools and a phone remote.">
+<meta property="og:image" content="https://itripathiharsh.github.io/autoverse-app/img/home.jpg">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/png" href="img/mark.png"><title>AutoVerse</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira:wdth,wght@75..125,300..800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&family=Noto+Sans+Devanagari:wght@500;600&display=swap">
+<style>
+/* Layout concept: a night drive. The page is the road; the head-unit screen rides along (sticky) while the story scrolls past it like signboards. */
+:root {
+  --ink: #06080B;          /* night sky / page */
+  --land: #10141A;         /* map land, the app's own night-map base */
+  --raise: #171C24;        /* raised panels */
+  --line: rgba(236, 242, 255, 0.09);
+  --text: #EEF1F5;
+  --muted: #9AA4B2;
+  --faint: #6B7482;
+  --route: #4C93FF;        /* the route line, the app's accent */
+  --amber: #E3A24F;        /* highways on the night map, street lights */
+  --go: #3DD68C;           /* arrival time */
+  --stop: #FF5A52;         /* destination pin, speed-limit ring */
+  --display: "Saira", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
+  --body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --hindi: "Noto Sans Devanagari", "Nirmala UI", "Mangal", sans-serif;
+  --gutter-l: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--ink);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 60; background: var(--ink); }
+a { color: inherit; }
+img { max-width: 100%; display: block; }
+.wrap { width: 100%; max-width: 1200px; margin: 0 auto; padding-left: var(--gutter-l); padding-right: var(--gutter-r); }
+h1, h2, h3 { font-family: var(--display); font-weight: 700; line-height: 1.02; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+p { margin: 0; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--amber); }
+.lede { color: var(--muted); font-size: clamp(17px, 1.6vw, 19px); max-width: 60ch; }
+:focus-visible { outline: 2px solid var(--route); outline-offset: 3px; border-radius: 6px; }
+
+/* ---------- nav ---------- */
+.nav {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 50;
+  background: color-mix(in srgb, var(--ink) 78%, transparent);
+  backdrop-filter: saturate(140%) blur(12px); -webkit-backdrop-filter: saturate(140%) blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+.nav .wrap { display: flex; align-items: center; gap: 24px; height: 64px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font-family: var(--display); font-weight: 700; font-size: 20px; font-stretch: 110%; letter-spacing: 0.01em; }
+.brand img { height: 22px; width: auto; }
+.brand b { color: var(--route); font-weight: 700; }
+.nav-links { display: flex; gap: 22px; margin-left: auto; font-size: 14px; color: var(--muted); }
+.nav-links a { text-decoration: none; }
+.nav-links a:hover { color: var(--text); }
+.btn {
+  display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 600; font-size: 15px;
+  padding: 12px 20px; border-radius: 999px; border: 0; cursor: pointer; white-space: nowrap;
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+}
+.btn svg { width: 18px; height: 18px; flex: none; }
+.btn-primary { background: var(--route); color: #04101F; box-shadow: 0 8px 30px -8px color-mix(in srgb, var(--route) 70%, transparent); }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 38px -10px color-mix(in srgb, var(--route) 85%, transparent); }
+.btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
+.btn-ghost:hover { background: var(--raise); }
+.nav .btn { padding: 9px 16px; font-size: 14px; }
+@media (max-width: 760px) { .nav-links { display: none; } .nav .btn { margin-left: auto; } }
+
+/* ---------- hero ---------- */
+.hero { position: relative; overflow: hidden; padding-block: clamp(48px, 7vw, 96px) clamp(40px, 6vw, 80px); }
+#road { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; opacity: .9; }
+.hero::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(90deg, var(--ink) 0 34%, color-mix(in srgb, var(--ink) 55%, transparent) 52%, transparent 75%), linear-gradient(to bottom, transparent 60%, var(--ink)); }
+@media (max-width: 900px) { .hero::after { background: linear-gradient(to bottom, color-mix(in srgb, var(--ink) 80%, transparent) 0 50%, var(--ink)); } }
+.hero .wrap { position: relative; z-index: 2; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: clamp(28px, 4vw, 56px); align-items: center; }
+.hero h1 { font-size: clamp(44px, 6.6vw, 92px); font-stretch: 82%; font-weight: 750; margin-top: 18px; }
+.hero h1 .hl { color: var(--route); }
+.hero .lede { margin-top: 22px; }
+.cta-row { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 30px; }
+.cta-meta { font-family: var(--mono); font-size: 12.5px; color: var(--faint); margin-top: 14px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 26px; }
+.chip { font-size: 13px; color: var(--muted); padding: 6px 12px; border-radius: 999px; background: color-mix(in srgb, var(--raise) 80%, transparent); border: 1px solid var(--line); }
+.hindi { font-family: var(--hindi); }
+
+.unit { perspective: 1400px; }
+.unit-body {
+  position: relative; border-radius: 22px; padding: 14px;
+  background: linear-gradient(160deg, #262C36, #0D1015 55%, #1A1F27);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.06) inset, 0 40px 90px -30px rgba(0,0,0,.9), 0 0 120px -40px color-mix(in srgb, var(--route) 55%, transparent);
+  transform: rotateY(-16deg) rotateX(8deg) rotateZ(1deg);
+  transform-style: preserve-3d; will-change: transform;
+}
+.unit-body::before { content: "AUTOVERSE"; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); font-family: var(--mono); font-size: 8px; letter-spacing: .4em; color: #3A414D; }
+.screen { position: relative; border-radius: 10px; overflow: hidden; aspect-ratio: 16 / 9; background: var(--land); max-width: 100%; }
+.screen img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.glare { position: absolute; inset: 0; background: linear-gradient(115deg, rgba(255,255,255,.10), transparent 35%); pointer-events: none; }
+.knob { position: absolute; top: 50%; width: 10px; height: 46px; margin-top: -23px; border-radius: 6px; background: #2A303A; }
+.knob.l { left: -6px; } .knob.r { right: -6px; }
+
+@media (max-width: 900px) {
+  .hero .wrap { grid-template-columns: minmax(0, 1fr); }
+  .unit-body { transform: rotateX(6deg); }
+}
+
+/* ---------- ticker ---------- */
+.ticker { border-block: 1px solid var(--line); overflow: hidden; background: var(--land); }
+.ticker-track { display: flex; gap: 48px; width: max-content; padding-block: 14px; animation: tick 38s linear infinite; font-family: var(--mono); font-size: 13px; color: var(--muted); }
+.ticker-track span::before { content: "●"; color: var(--amber); margin-right: 12px; font-size: 9px; vertical-align: 2px; }
+@keyframes tick { to { transform: translateX(-50%); } }
+
+/* ---------- section scaffolding ---------- */
+section { position: relative; }
+.sec { padding-block: clamp(72px, 10vw, 140px); }
+.sec-head { display: grid; gap: 18px; max-width: 760px; }
+.sec-head h2 { font-size: clamp(36px, 5vw, 64px); font-stretch: 85%; }
+
+/* ---------- the mess (pinned) ---------- */
+.mess { padding-block: 0; }
+.mess-stage { height: 100vh; min-height: 560px; display: grid; place-items: center; position: relative; overflow: hidden; }
+.mess-inner { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 48px; align-items: center; width: 100%; }
+.mess-lines { position: relative; min-height: 220px; }
+.mess-line { font-family: var(--display); font-size: clamp(32px, 4.4vw, 58px); font-stretch: 85%; font-weight: 700; line-height: 1.05; }
+.mess-line + .mess-line { margin-top: 18px; }
+.mess-line .dim { color: var(--faint); }
+.mess-line em { font-style: normal; color: var(--route); }
+.mess-board { position: relative; aspect-ratio: 16 / 10; max-width: 100%; }
+.mess-screen { position: absolute; inset: 12% 8%; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: var(--land); }
+.mess-screen img { width: 100%; height: 100%; object-fit: cover; opacity: .18; }
+.tile {
+  position: absolute; width: 22%; aspect-ratio: 1; border-radius: 22px; display: grid; place-items: center; gap: 4px; text-align: center;
+  background: var(--raise); border: 1px solid var(--line); box-shadow: 0 20px 40px -20px rgba(0,0,0,.8);
+  font-size: 12px; color: var(--muted); padding: 10px;
+}
+.tile svg { width: 34%; height: auto; }
+.mess-note { position: absolute; left: 0; bottom: 6%; font-family: var(--mono); font-size: 12px; color: var(--faint); }
+@media (max-width: 900px) {
+  .mess-stage { height: auto; min-height: 0; padding-block: 80px; }
+  .mess-inner { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---------- tour (sticky screen) ---------- */
+.tour .wrap { display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: clamp(28px, 5vw, 72px); }
+.tour-steps { display: grid; gap: 0; }
+.step { min-height: 78vh; display: flex; flex-direction: column; justify-content: center; gap: 16px; padding-block: 40px; opacity: .38; transition: opacity .4s ease; }
+.step.active { opacity: 1; }
+.step .eyebrow { color: var(--route); }
+.step h3 { font-size: clamp(30px, 3.6vw, 46px); font-stretch: 88%; }
+.step p { color: var(--muted); max-width: 46ch; }
+.step ul { margin: 4px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; color: var(--text); font-size: 15px; }
+.step li { display: flex; gap: 10px; align-items: baseline; }
+.step li::before { content: ""; flex: none; width: 14px; height: 2px; background: var(--amber); transform: translateY(-4px); }
+.step-shot { display: none; border-radius: 12px; border: 1px solid var(--line); overflow: hidden; }
+.tour-sticky { position: sticky; top: calc(64px + env(safe-area-inset-top, 0px)); height: calc(100vh - 64px); display: flex; align-items: center; }
+.tour-unit { width: 100%; }
+.tour-unit .unit-body { transform: none; }
+.tour-unit .screen img { opacity: 0; transition: opacity .55s ease, transform .9s cubic-bezier(.2,.7,.2,1); transform: scale(1.04); }
+.tour-unit .screen img.on { opacity: 1; transform: scale(1); }
+.tour-caption { margin-top: 14px; display: flex; justify-content: space-between; font-family: var(--mono); font-size: 12px; color: var(--faint); }
+.tour-progress { display: flex; gap: 6px; }
+.tour-progress i { width: 22px; height: 3px; border-radius: 3px; background: var(--line); transition: background .3s ease, width .3s ease; }
+.tour-progress i.on { background: var(--route); width: 34px; }
+@media (max-width: 900px) {
+  .tour .wrap { grid-template-columns: minmax(0, 1fr); }
+  .tour-sticky { display: none; }
+  .step { min-height: 0; opacity: 1; padding-block: 28px; }
+  .step-shot { display: block; }
+}
+
+/* ---------- share route ---------- */
+.share .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: clamp(28px, 5vw, 64px); align-items: center; }
+.share-copy { display: grid; gap: 20px; }
+.share-copy h2 { font-size: clamp(34px, 4.6vw, 58px); font-stretch: 85%; }
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-family: var(--mono); font-size: 13px; color: var(--muted); }
+.flow b { color: var(--text); font-weight: 500; padding: 6px 10px; border-radius: 8px; background: var(--raise); border: 1px solid var(--line); }
+.mapbox { position: relative; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); background: var(--land); aspect-ratio: 4 / 3; max-width: 100%; }
+.mapbox svg { width: 100%; height: 100%; display: block; }
+.map-card { position: absolute; left: 4%; bottom: 5%; padding: 12px 16px; border-radius: 14px; background: color-mix(in srgb, var(--ink) 88%, transparent); border: 1px solid var(--line); min-width: 0; max-width: 70%; }
+.map-card strong { display: block; font-size: 15px; }
+.map-card span { font-family: var(--mono); font-size: 12.5px; color: var(--go); }
+@media (max-width: 900px) { .share .wrap { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---------- India grid ---------- */
+.india-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px; margin-top: 48px; }
+.cell { background: var(--land); border: 1px solid var(--line); border-radius: 18px; padding: 24px; display: grid; gap: 12px; align-content: start; min-width: 0; overflow: hidden; position: relative; }
+.cell h3 { font-size: 24px; font-stretch: 90%; }
+.cell p { color: var(--muted); font-size: 15px; }
+.c-voice { grid-column: span 4; }
+.c-limit { grid-column: span 2; }
+.c-stops { grid-column: span 3; }
+.c-ram { grid-column: span 3; }
+.voice-bubble { font-family: var(--hindi); font-size: clamp(22px, 2.6vw, 30px); font-weight: 600; line-height: 1.35; padding: 18px 20px; border-radius: 16px; background: var(--raise); }
+.voice-bubble small { display: block; font-family: var(--body); font-size: 13px; font-weight: 400; color: var(--faint); margin-top: 6px; }
+.wave { display: flex; gap: 4px; align-items: center; height: 26px; }
+.wave i { width: 4px; border-radius: 3px; background: var(--route); height: 30%; animation: wave 1.1s ease-in-out infinite; }
+@keyframes wave { 50% { height: 100%; } }
+.limit { display: flex; align-items: center; gap: 18px; }
+.sign { width: 92px; height: 92px; border-radius: 50%; background: #fff; border: 10px solid var(--stop); display: grid; place-items: center; color: #111; font-family: var(--display); font-weight: 800; font-size: 34px; flex: none; }
+.speed { font-family: var(--mono); font-weight: 700; font-size: 54px; line-height: 1; font-variant-numeric: tabular-nums; transition: color .3s; }
+.speed small { display: block; font-size: 13px; font-weight: 500; color: var(--faint); margin-top: 6px; }
+.speed.over { color: var(--stop); }
+.stop-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.stop-chips span { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 999px; background: var(--raise); border: 1px solid var(--line); font-size: 14px; font-weight: 500; }
+.stop-chips svg { width: 16px; height: 16px; color: var(--amber); }
+.ram { display: grid; gap: 10px; }
+.ram-row { display: grid; grid-template-columns: 64px minmax(0, 1fr) 56px; gap: 12px; align-items: center; font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
+.bar { height: 8px; border-radius: 8px; background: var(--raise); overflow: hidden; }
+.bar i { display: block; height: 100%; width: var(--w); border-radius: 8px; background: linear-gradient(90deg, var(--route), color-mix(in srgb, var(--route) 60%, var(--go))); transform-origin: left; }
+@media (max-width: 900px) { .india-grid { grid-template-columns: minmax(0, 1fr); } .c-voice, .c-limit, .c-stops, .c-ram { grid-column: auto; } }
+
+/* ---------- phone remote ---------- */
+.remote .wrap { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: clamp(28px, 5vw, 72px); align-items: center; }
+.remote-copy { display: grid; gap: 20px; }
+.remote-copy h2 { font-size: clamp(34px, 4.6vw, 58px); font-stretch: 85%; }
+.ways { display: grid; gap: 14px; margin-top: 6px; }
+.way { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 14px; align-items: start; }
+.way .ico { width: 40px; height: 40px; border-radius: 12px; background: var(--raise); border: 1px solid var(--line); display: grid; place-items: center; color: var(--route); }
+.way .ico svg { width: 20px; height: 20px; }
+.way strong { display: block; font-size: 16px; }
+.way span { color: var(--muted); font-size: 15px; }
+.phone { width: min(300px, 100%); margin: 0 auto; border-radius: 42px; padding: 12px; background: linear-gradient(160deg, #2A303A, #0C0F14); box-shadow: 0 40px 80px -30px rgba(0,0,0,.9), 0 0 0 1px rgba(255,255,255,.06) inset; }
+.phone-screen { border-radius: 32px; background: var(--ink); padding: 26px 16px 22px; display: grid; gap: 12px; position: relative; overflow: hidden; }
+.phone-screen::before { content: ""; position: absolute; top: 8px; left: 50%; width: 80px; height: 20px; margin-left: -40px; border-radius: 12px; background: #000; }
+.ph-top { display: flex; justify-content: space-between; align-items: center; font-size: 13px; padding-top: 14px; }
+.ph-top b { font-family: var(--display); font-stretch: 95%; font-size: 17px; }
+.ph-top span { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 11.5px; }
+.ph-top span::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--go); }
+.ph-card { background: var(--land); border-radius: 18px; padding: 14px; display: grid; gap: 4px; }
+.ph-card small { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; color: var(--faint); }
+.ph-card strong { font-size: 16px; }
+.ph-card em { font-style: normal; color: var(--muted); font-size: 13px; }
+.ph-ctrl { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+.ph-ctrl button { border: 0; border-radius: 50%; width: 46px; height: 46px; background: var(--raise); color: var(--text); display: grid; place-items: center; cursor: pointer; }
+.ph-ctrl button.play { width: 60px; height: 60px; background: var(--text); color: var(--ink); }
+.ph-ctrl svg { width: 22px; height: 22px; }
+.ph-eta { color: var(--go); font-family: var(--display); font-weight: 700; font-size: 22px; font-stretch: 90%; }
+.ph-send { display: flex; gap: 8px; }
+.ph-send div { flex: 1; min-width: 0; border-radius: 12px; background: var(--raise); padding: 10px 12px; font-size: 12px; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ph-send b { border-radius: 12px; background: var(--route); color: #04101F; padding: 10px 14px; font-size: 13px; }
+@media (max-width: 900px) { .remote .wrap { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---------- compare ---------- */
+.table-wrap { overflow-x: auto; margin-top: 44px; border-radius: 18px; border: 1px solid var(--line); }
+table { width: 100%; border-collapse: collapse; min-width: 640px; font-size: 15px; }
+th, td { text-align: left; padding: 16px 20px; border-bottom: 1px solid var(--line); vertical-align: top; }
+thead th { font-family: var(--mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); font-weight: 500; background: var(--land); }
+thead th.us { color: var(--route); }
+tbody th { font-weight: 500; color: var(--muted); width: 26%; }
+td.us { color: var(--text); background: color-mix(in srgb, var(--route) 7%, transparent); font-weight: 500; }
+td { color: var(--muted); }
+tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- install ---------- */
+.install { background: linear-gradient(180deg, transparent, var(--land) 30%, var(--land)); }
+.install-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 44px; }
+.inst { padding: 26px; border-radius: 18px; border: 1px solid var(--line); background: var(--ink); display: grid; gap: 10px; align-content: start; }
+.inst .n { font-family: var(--mono); font-weight: 700; font-size: 13px; color: var(--amber); }
+.inst h3 { font-size: 24px; font-stretch: 90%; }
+.inst p { color: var(--muted); font-size: 15px; }
+.big-cta { margin-top: 56px; padding: clamp(28px, 5vw, 56px); border-radius: 24px; background: radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--route) 26%, var(--ink)), var(--ink) 60%); border: 1px solid var(--line); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 28px; align-items: center; }
+.big-cta h2 { font-size: clamp(32px, 4.4vw, 56px); font-stretch: 85%; }
+.big-cta p { color: var(--muted); margin-top: 12px; }
+.linkbox { display: flex; gap: 8px; align-items: center; margin-top: 18px; flex-wrap: wrap; }
+.linkbox code { font-family: var(--mono); font-size: 12.5px; color: var(--muted); background: var(--raise); padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line); overflow-wrap: anywhere; min-width: 0; }
+.copy { font: inherit; font-size: 13px; color: var(--text); background: transparent; border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; cursor: pointer; }
+@media (max-width: 900px) { .install-grid { grid-template-columns: minmax(0, 1fr); } .big-cta { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---------- faq ---------- */
+.faq-list { margin-top: 36px; display: grid; gap: 10px; max-width: 860px; }
+details { border: 1px solid var(--line); border-radius: 14px; background: var(--land); }
+summary { cursor: pointer; list-style: none; padding: 18px 22px; font-weight: 600; display: flex; justify-content: space-between; gap: 16px; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: "+"; font-family: var(--mono); color: var(--route); font-size: 18px; line-height: 1; }
+details[open] summary::after { content: "–"; }
+details p { padding: 0 22px 20px; color: var(--muted); max-width: 70ch; }
+
+footer { border-top: 1px solid var(--line); padding-block: 36px; color: var(--faint); font-size: 14px; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .ticker-track, .wave i { animation: none; }
+  .unit-body { transform: none !important; }
+}
+</style>
+</head>
+<body>
+
+
+<!-- ============ NAV ============ -->
+<nav class="nav" aria-label="Main">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="AutoVerse home"><img src="img/mark.png" alt=""><span><b>Auto</b>Verse</span></a>
+    <div class="nav-links">
+      <a href="#tour">Features</a>
+      <a href="#share">Google Maps</a>
+      <a href="#remote">Phone</a>
+      <a href="#install">Install</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <a class="btn btn-primary dl" href="AutoVerse-1.7.1.apk" download>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>Download
+    </a>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero" id="top">
+  <canvas id="road" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div class="hero-copy">
+      <div class="eyebrow">Car launcher for Android head units · Made for India</div>
+      <h1>Your car screen, finally a <span class="hl">cockpit.</span></h1>
+      <p class="lede">AutoVerse replaces your head unit's home screen with one fast dashboard: a live night map with turn-by-turn, your music, your speed and real car tools. No Android Auto, no phone app, no subscription.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary dl" href="AutoVerse-1.7.1.apk" download>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>Download for Android
+        </a>
+        <a class="btn btn-ghost" href="#tour">See it drive</a>
+      </div>
+      <div class="cta-meta">Version 1.7.1 · 12.5 MB APK · Android 6.0 and newer · Free</div>
+      <div class="chips">
+        <span class="chip hindi">हिंदी में रास्ता</span>
+        <span class="chip">Runs on 2 GB units</span>
+        <span class="chip">Free map, no API keys</span>
+      </div>
+    </div>
+    <div class="unit" aria-label="AutoVerse home screen on a car head unit">
+      <div class="unit-body" id="heroUnit">
+        <span class="knob l"></span><span class="knob r"></span>
+        <div class="screen"><img src="img/home.jpg" alt="AutoVerse home: night map of New Delhi, music panel and a large speed readout"><div class="glare"></div></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track">
+    <span>Turn-by-turn in Hindi</span><span>Speed-limit sign and camera alerts</span><span>Petrol · CNG · EV stops on your route</span><span>Share from Google Maps</span><span>Phone remote by QR</span><span>Speaker test for 2 to 6 speakers</span><span>PUC, insurance and service reminders</span><span>Trips and fuel cost in ₹</span><span>Music resumes when the car starts</span>
+    <span>Turn-by-turn in Hindi</span><span>Speed-limit sign and camera alerts</span><span>Petrol · CNG · EV stops on your route</span><span>Share from Google Maps</span><span>Phone remote by QR</span><span>Speaker test for 2 to 6 speakers</span><span>PUC, insurance and service reminders</span><span>Trips and fuel cost in ₹</span><span>Music resumes when the car starts</span>
+  </div>
+</div>
+
+<!-- ============ THE MESS ============ -->
+<section class="mess" id="why">
+  <div class="mess-stage" id="messStage">
+    <div class="wrap mess-inner">
+      <div class="mess-lines">
+        <p class="mess-line" data-m="0">Maps in one app. Music in another. <span class="dim">Speed nowhere.</span></p>
+        <p class="mess-line" data-m="1"><span class="dim">Every switch is a</span> glance off the road.</p>
+        <p class="mess-line" data-m="2">AutoVerse puts it all on <em>one screen.</em></p>
+      </div>
+      <div class="mess-board" id="messBoard" aria-hidden="true">
+        <div class="mess-screen"><img id="messShot" src="img/home.jpg" alt=""></div>
+        <div class="tile" style="left:2%;top:4%"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Zm0 0v14m6-12v14"/></svg>Maps</div>
+        <div class="tile" style="left:40%;top:-4%"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Music</div>
+        <div class="tile" style="left:76%;top:8%"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a9 9 0 1 0 9 9"/><path d="M12 12l5-5"/></svg>Speed</div>
+        <div class="tile" style="left:-2%;top:58%"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m7 7 10 10-5 5V2l5 5L7 17"/></svg>Bluetooth</div>
+        <div class="tile" style="left:38%;top:70%"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 18h16M6 14l2-6h8l2 6"/><circle cx="8" cy="18" r="2"/><circle cx="16" cy="18" r="2"/></svg>Car</div>
+        <div class="tile" style="left:78%;top:62%"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/></svg>Settings</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOUR ============ -->
+<section class="tour sec" id="tour">
+  <div class="wrap">
+    <div class="tour-steps">
+      <article class="step active" data-shot="home">
+        <div class="eyebrow">Home</div>
+        <h3>Everything at a glance</h3>
+        <p>The live map takes most of the screen, with your music and a big speed readout beside it. One look tells you where you are, what's playing and how fast you're going.</p>
+        <ul><li>Clock and temperature in the side rail, not a top bar</li><li>Choose what stays on Home with Edit</li><li>Full screen, dark by default</li></ul>
+        <img class="step-shot" src="img/home.jpg" alt="AutoVerse home screen">
+      </article>
+      <article class="step" data-shot="preview">
+        <div class="eyebrow">Night map</div>
+        <h3>A map made for night driving</h3>
+        <p>Warm highways, grey city roads, blue water and green parks, with street names large enough to read from the driver's seat. Search a place and see time, distance and arrival before you go.</p>
+        <ul><li>Detailed OpenStreetMap data, free of charge</li><li>Arrival time in English or <span class="hindi">हिंदी</span></li><li>Save Home and Work for one-tap trips</li></ul>
+        <img class="step-shot" src="img/preview.jpg" alt="Route preview to Connaught Place">
+      </article>
+      <article class="step" data-shot="guidance">
+        <div class="eyebrow">Turn-by-turn</div>
+        <h3>Navigation that stays in the app</h3>
+        <p>The map tilts and the car arrow sits low so you see the road ahead. A big turn card shows the distance, the instruction and the turn after next, with voice in Hindi or English.</p>
+        <ul><li>Routes calculated on the head unit itself</li><li>Speed-limit sign and speed-camera warnings</li><li>Petrol, CNG and EV stops along your route</li></ul>
+        <img class="step-shot" src="img/guidance.jpg" alt="Turn-by-turn guidance with a turn card">
+      </article>
+      <article class="step" data-shot="homeguide">
+        <div class="eyebrow">While you drive</div>
+        <h3>The map grows when you navigate</h3>
+        <p>Start a trip and Home gives the map 70% of the screen. The next turn and your arrival time stay big while music and speed move aside.</p>
+        <ul><li>Continue your trip after a stop</li><li>The route stays when day turns to night</li></ul>
+        <img class="step-shot" src="img/homeguide.jpg" alt="Home screen during navigation">
+      </article>
+      <article class="step" data-shot="music">
+        <div class="eyebrow">Music</div>
+        <h3>Your music, from anywhere</h3>
+        <p>Songs on a USB stick or SD card, your phone over Bluetooth, or apps like Spotify, JioSaavn and YT Music. Play, pause and skip with large buttons, and the music picks up again when you start the car.</p>
+        <ul><li>Albums, artists and folders for USB music</li><li>Phone music shows with its own controls</li></ul>
+        <img class="step-shot" src="img/music.jpg" alt="Music page with sources">
+      </article>
+      <article class="step" data-shot="speakers">
+        <div class="eyebrow">Car tools</div>
+        <h3>Tools only a car needs</h3>
+        <p>Test every speaker, from a 2-speaker hatchback to a 6-speaker setup with a subwoofer. Log trips and fuel cost automatically, and get reminded before PUC, insurance or a service is due.</p>
+        <ul><li>Tap a speaker on the diagram to hear only that one</li><li>Trips and fuel cost in ₹ per month</li><li>An honest head unit check, not a "booster"</li></ul>
+        <img class="step-shot" src="img/speakers.jpg" alt="Speaker test with a car diagram">
+      </article>
+      <article class="step" data-shot="phone">
+        <div class="eyebrow">Phone</div>
+        <h3>Your phone becomes the remote</h3>
+        <p>Turn it on, scan the QR code, and a remote opens in your phone's browser. Change the song, adjust the volume or send a place to the car. iPhone or Android, nothing to install.</p>
+        <ul><li>Works over your phone's hotspot</li><li>A pairing code keeps other people out</li></ul>
+        <img class="step-shot" src="img/phone.jpg" alt="Phone remote QR code on the car screen">
+      </article>
+    </div>
+    <div class="tour-sticky" aria-hidden="true">
+      <div class="tour-unit unit">
+        <div class="unit-body">
+          <span class="knob l"></span><span class="knob r"></span>
+          <div class="screen" id="tourScreen">
+            <img data-k="home" class="on" src="img/home.jpg" alt="">
+            <img data-k="preview" src="img/preview.jpg" alt="">
+            <img data-k="guidance" src="img/guidance.jpg" alt="">
+            <img data-k="homeguide" src="img/homeguide.jpg" alt="">
+            <img data-k="music" src="img/music.jpg" alt="">
+            <img data-k="speakers" src="img/speakers.jpg" alt="">
+            <img data-k="phone" src="img/phone.jpg" alt="">
+            <div class="glare"></div>
+          </div>
+        </div>
+        <div class="tour-caption"><span id="tourLabel">Home</span><span class="tour-progress" id="tourProgress"></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SHARE FROM GOOGLE MAPS ============ -->
+<section class="share sec" id="share">
+  <div class="wrap">
+    <div class="share-copy">
+      <div class="eyebrow">Share from Google Maps</div>
+      <h2>Found it in Google Maps? Send the same route to the car.</h2>
+      <p class="lede">Village not on the map? Tap Share in Google Maps and pick AutoVerse. The destination and every stop you added open on the car screen, and AutoVerse drives you there.</p>
+      <div class="flow"><b>Google Maps</b> → <b>Share</b> → <b>AutoVerse</b> → <b>Start</b></div>
+    </div>
+    <div class="mapbox" aria-label="Animated route from New Delhi via India Gate to Connaught Place">
+      <svg viewBox="0 0 400 300" id="routeSvg" role="img">
+        <rect width="400" height="300" fill="#10141A"/>
+        <g stroke="#1E2530" stroke-width="5" fill="none">
+          <path d="M0 210 L400 170"/><path d="M60 0 L120 300"/><path d="M250 0 L230 300"/><path d="M0 90 L400 60"/>
+          <circle cx="232" cy="70" r="34"/><circle cx="232" cy="70" r="20"/>
+        </g>
+        <g stroke="#2B3340" stroke-width="2.5" fill="none">
+          <path d="M0 140 L400 120"/><path d="M160 0 L170 300"/><path d="M320 0 L340 300"/><path d="M0 260 L400 240"/><path d="M90 300 L300 0"/>
+        </g>
+        <rect x="270" y="190" width="70" height="40" rx="6" fill="#122A21"/>
+        <rect x="20" y="20" width="60" height="44" rx="6" fill="#122A21"/>
+        <path d="M300 250 Q360 270 400 255 L400 300 L280 300 Z" fill="#0D2238"/>
+        <path d="M0 200 L400 160" stroke="#C0853D" stroke-width="4" opacity=".75"/>
+        <path id="routeCasing" d="M120 236 L118 196 L150 150 L232 120 L236 86 L232 70" stroke="#0A2A66" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <path id="routeLine" d="M120 236 L118 196 L150 150 L232 120 L236 86 L232 70" stroke="#4C93FF" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="120" cy="236" r="7" fill="#fff"/><circle cx="120" cy="236" r="4.5" fill="#4C93FF"/>
+        <g id="viaPin"><circle cx="150" cy="150" r="8" fill="#E3A24F" stroke="#fff" stroke-width="2.5"/><text x="162" y="146" fill="#EEF1F5" font-size="11" font-family="Inter, sans-serif">India Gate (stop)</text></g>
+        <g id="destPin"><circle cx="232" cy="70" r="9" fill="#FF5A52" stroke="#fff" stroke-width="3"/><text x="246" y="66" fill="#EEF1F5" font-size="11" font-family="Inter, sans-serif">Connaught Place</text></g>
+      </svg>
+      <div class="map-card"><strong>Connaught Place</strong><span>via India Gate · 6 min · 3.7 km</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BUILT FOR INDIA ============ -->
+<section class="sec" id="india">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Built for Indian roads</div>
+      <h2>Made for the way India drives.</h2>
+      <p class="lede">Hindi directions, the stops you actually look for, and a speed alert before the challan. It even runs on the cheapest head units sold today.</p>
+    </div>
+    <div class="india-grid">
+      <div class="cell c-voice">
+        <h3>Directions in Hindi</h3>
+        <div class="voice-bubble">100 मीटर बाद हल्का दाएँ मुड़ें, फिर बाएँ मुड़ें<small>"In 100 metres keep slightly right, then turn left"</small></div>
+        <div class="wave" aria-hidden="true"><i style="animation-delay:0s"></i><i style="animation-delay:.1s"></i><i style="animation-delay:.2s"></i><i style="animation-delay:.3s"></i><i style="animation-delay:.4s"></i><i style="animation-delay:.15s"></i><i style="animation-delay:.25s"></i><i style="animation-delay:.05s"></i><i style="animation-delay:.35s"></i><i style="animation-delay:.2s"></i></div>
+      </div>
+      <div class="cell c-limit">
+        <h3>Speed limits</h3>
+        <div class="limit"><div class="sign">60</div><div class="speed" id="speedNum">58<small>km/h</small></div></div>
+        <p>The number turns red with a chime when you cross the limit.</p>
+      </div>
+      <div class="cell c-stops">
+        <h3>Stops on your route</h3>
+        <div class="stop-chips">
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16M3 21h12M14 9h2a2 2 0 0 1 2 2v5a1.5 1.5 0 0 0 3 0V8l-3-3"/></svg>Petrol</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="3" width="10" height="18" rx="5"/><path d="M10 3V1h4v2"/></svg>CNG</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/></svg>EV charging</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="4" r="2"/><circle cx="17" cy="4" r="2"/><path d="M5 22v-7H3l2-7h4l2 7H9v7M15 22V8h4v8h-1v6"/></svg>Toilets</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 2v20M4 2v6a3 3 0 0 0 6 0V2M17 2c-2 2-3 5-3 8h4v12"/></svg>Food</span>
+        </div>
+        <p>Find them near you, or ahead on the route while you drive, then add one as a stop with a tap.</p>
+      </div>
+      <div class="cell c-ram">
+        <h3>Runs on budget units</h3>
+        <div class="ram" id="ramBars">
+          <div class="ram-row"><span>2 GB</span><div class="bar"><i style="--w:62%"></i></div><span>smooth</span></div>
+          <div class="ram-row"><span>3 GB</span><div class="bar"><i style="--w:78%"></i></div><span>smooth</span></div>
+          <div class="ram-row"><span>4 GB+</span><div class="bar"><i style="--w:100%"></i></div><span>all effects</span></div>
+        </div>
+        <p>On units under 3 GB, AutoVerse switches to a lighter mode on its own, so every frame goes to the map.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PHONE REMOTE ============ -->
+<section class="remote sec" id="remote">
+  <div class="wrap">
+    <div class="remote-copy">
+      <div class="eyebrow">Your phone, connected in seconds</div>
+      <h2>No Android Auto. No waiting to connect.</h2>
+      <p class="lede">Three optional ways to use your phone with the car, all off the main screens until you turn them on.</p>
+      <div class="ways">
+        <div class="way"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg></div><div><strong>Phone remote by QR</strong><span>Scan once and control music, volume and destinations from your phone's browser.</span></div></div>
+        <div class="way"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7 7 10 10-5 5V2l5 5L7 17"/></svg></div><div><strong>Music over Bluetooth</strong><span>Pair once. After that your phone connects by itself every time the car starts.</span></div></div>
+        <div class="way"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M7.5 10c3-1 6.5-.8 9 .8M8 13.2c2.5-.7 5.2-.5 7.2.7M8.6 16c1.9-.5 3.9-.3 5.5.5"/></svg></div><div><strong>Spotify Connect</strong><span>With Spotify on the unit, your phone sends music to the car in one tap.</span></div></div>
+      </div>
+    </div>
+    <div class="phone" aria-label="AutoVerse Remote on a phone">
+      <div class="phone-screen">
+        <div class="ph-top"><b>AutoVerse Remote</b><span>Connected to car</span></div>
+        <div class="ph-card">
+          <small>NOW PLAYING</small>
+          <strong id="phSong">Kesariya</strong>
+          <em>Arijit Singh</em>
+          <div class="ph-ctrl">
+            <button type="button" aria-label="Previous" data-act="prev"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg></button>
+            <button type="button" class="play" aria-label="Play or pause" id="phPlay"><svg viewBox="0 0 24 24" fill="currentColor" id="phIcon"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg></button>
+            <button type="button" aria-label="Next" data-act="next"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
+          </div>
+        </div>
+        <div class="ph-card"><small>ON THE WAY</small><div class="ph-eta">Arrive 11:50</div><em>Connaught Place · 6 min · 3.7 km</em></div>
+        <div class="ph-card"><small>SEND A PLACE TO THE CAR</small><div class="ph-send"><div>maps.app.goo.gl/…</div><b>Go</b></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COMPARE ============ -->
+<section class="sec" id="compare">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Why AutoVerse</div>
+      <h2>What you get, side by side.</h2>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th scope="col"></th><th scope="col" class="us">AutoVerse</th><th scope="col">Android Auto / CarPlay dongle</th><th scope="col">Stock head-unit launcher</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Price</th><td class="us">Free</td><td>Paid adapter</td><td>Included</td></tr>
+          <tr><th scope="row">Phone needed to drive</th><td class="us">No</td><td>Always</td><td>No</td></tr>
+          <tr><th scope="row">Wait to connect each drive</th><td class="us">None, it is the home screen</td><td>Connect and wait</td><td>None</td></tr>
+          <tr><th scope="row">Turn-by-turn on the car screen</th><td class="us">Built in, routes on the unit</td><td>From the phone</td><td>Separate app</td></tr>
+          <tr><th scope="row">Directions in Hindi</th><td class="us">Yes</td><td>Yes</td><td>Varies</td></tr>
+          <tr><th scope="row">Car tools</th><td class="us">Speaker test, trips, fuel cost, reminders</td><td>None</td><td>Basic</td></tr>
+          <tr><th scope="row">Map and music on one screen</th><td class="us">Yes</td><td>Split screen</td><td>Usually no</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ INSTALL ============ -->
+<section class="install sec" id="install">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Install in three steps</div>
+      <h2>On your car screen in five minutes.</h2>
+    </div>
+    <div class="install-grid">
+      <div class="inst"><span class="n">STEP 1</span><h3>Download the APK</h3><p>Open this page in the head unit's browser and tap Download, or copy the file to a USB stick from your computer.</p></div>
+      <div class="inst"><span class="n">STEP 2</span><h3>Install it</h3><p>Open the file and tap Install. If Android asks, allow installs from this source once.</p></div>
+      <div class="inst"><span class="n">STEP 3</span><h3>Make it your Home</h3><p>Open AutoVerse, allow location and music access (each one explains why), and set it as the default Home app.</p></div>
+    </div>
+    <div class="big-cta">
+      <div>
+        <h2>Turn your head unit into a cockpit.</h2>
+        <p>Version 1.7.1 · 12.5 MB · Android 6.0 and newer · Free</p>
+        <div class="linkbox"><code id="apkUrl">itripathiharsh.github.io/autoverse-app/AutoVerse-1.7.1.apk</code><button class="copy" type="button" id="copyBtn">Copy link</button></div>
+      </div>
+      <a class="btn btn-primary dl" href="AutoVerse-1.7.1.apk" download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>Download AutoVerse
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section class="sec" id="faq">
+  <div class="wrap">
+    <div class="sec-head"><div class="eyebrow">Questions</div><h2>Before you install.</h2></div>
+    <div class="faq-list">
+      <details><summary>Is AutoVerse really free?</summary><p>Yes. The map uses free OpenStreetMap data and the routing runs on the head unit itself, so there are no API keys, accounts or subscriptions to pay for.</p></details>
+      <details><summary>Which head units does it work on?</summary><p>Any Android head unit or tablet running Android 6.0 or newer, including common 9 and 10 inch units with 2 GB of RAM. It adapts to 1024×600, 1280×720 and wide screens.</p></details>
+      <details><summary>Does it need internet?</summary><p>The map tiles, place search and weather need internet, which most drivers share from their phone's hotspot. Routing runs on the unit: the first route in a new area downloads that area's road data once (about 20 to 60 MB).</p></details>
+      <details><summary>Can I still use Google Maps?</summary><p>Yes. Find any place in Google Maps and tap Share → AutoVerse, and the same route opens on AutoVerse's map. You can also open Google Maps from AutoVerse at any time.</p></details>
+      <details><summary>Does it work with iPhone?</summary><p>Yes. Phone music over Bluetooth and the QR phone remote both work with iPhone and Android, with nothing to install on the phone.</p></details>
+      <details><summary>What does AutoVerse do with my location?</summary><p>Your location stays on the unit. Only a rounded position (about 1 km) is sent for weather, and place searches send what you type. There is no account, tracking or advertising.</p></details>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="img/mark.png" alt=""><span><b>Auto</b>Verse</span></a>
+    <span>Map data © OpenStreetMap contributors · Tiles by OpenFreeMap</span>
+    <a href="https://github.com/itripathiharsh/AutoVerse" target="_blank" rel="noopener">Source code on GitHub</a>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+(function () {
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- hero: night road canvas ---------- */
+  var cv = document.getElementById("road"), ctx = cv.getContext("2d"), W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2), t = 0;
+  function size() { var r = cv.getBoundingClientRect(); W = r.width; H = r.height; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    var hx = W * (W > 900 ? 0.7 : 0.5), hy = H * 0.36;   // vanishing point, behind the head unit
+    var bw = W * 1.4;                              // road width at the bottom
+    // road surface
+    var g = ctx.createLinearGradient(0, hy, 0, H);
+    g.addColorStop(0, "rgba(16,20,26,0)"); g.addColorStop(1, "rgba(23,28,36,0.95)");
+    ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(hx - 6, hy); ctx.lineTo(hx + 6, hy); ctx.lineTo(hx + bw / 2, H); ctx.lineTo(hx - bw / 2, H); ctx.closePath(); ctx.fill();
+    // edges
+    ctx.strokeStyle = "rgba(227,162,79,0.35)"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(hx - 6, hy); ctx.lineTo(hx - bw / 2, H); ctx.moveTo(hx + 6, hy); ctx.lineTo(hx + bw / 2, H); ctx.stroke();
+    // lane dashes and street lights move toward the viewer
+    for (var i = 0; i < 14; i++) {
+      var z = ((i / 14) + t) % 1, z2 = Math.min(1, z + 0.035);
+      var y1 = hy + (H - hy) * z * z, y2 = hy + (H - hy) * z2 * z2;
+      ctx.strokeStyle = "rgba(236,242,255," + (0.08 + z * 0.35) + ")"; ctx.lineWidth = 1 + z * 6;
+      ctx.beginPath(); ctx.moveTo(hx + (bw * 0.0) * z, y1); ctx.lineTo(hx, y2); ctx.stroke();
+      // lights at both sides
+      var lx = (bw / 2) * z * z * 1.1, r = 1 + z * z * 7, a = 0.15 + z * 0.55;
+      ctx.fillStyle = "rgba(227,162,79," + a + ")";
+      ctx.beginPath(); ctx.arc(hx - lx - 30 * z, y1 - 60 * z * z, r, 0, 6.283); ctx.arc(hx + lx + 30 * z, y1 - 60 * z * z, r, 0, 6.283); ctx.fill();
+    }
+    // route glow along the centre-right lane
+    var rg = ctx.createLinearGradient(0, hy, 0, H);
+    rg.addColorStop(0, "rgba(76,147,255,0)"); rg.addColorStop(1, "rgba(76,147,255,0.55)");
+    ctx.strokeStyle = rg; ctx.lineWidth = 10; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(hx + 2, hy + 4); ctx.quadraticCurveTo(hx + bw * 0.06, H * 0.75, hx + bw * 0.16, H); ctx.stroke();
+    if (!reduce) { t = (t + 0.0035) % 1; requestAnimationFrame(draw); }
+  }
+  size(); draw(); window.addEventListener("resize", function () { size(); if (reduce) draw(); });
+
+  /* ---------- copy link ---------- */
+  var copyBtn = document.getElementById("copyBtn");
+  copyBtn.addEventListener("click", function () {
+    var text = "https://" + document.getElementById("apkUrl").textContent;
+    function selectIt() { var r = document.createRange(); r.selectNodeContents(document.getElementById("apkUrl")); var s = getSelection(); s.removeAllRanges(); s.addRange(r); copyBtn.textContent = "Selected, press copy"; }
+    try {
+      navigator.clipboard.writeText(text).then(function () { copyBtn.textContent = "Copied"; setTimeout(function () { copyBtn.textContent = "Copy link"; }, 1800); }, selectIt);
+    } catch (e) { selectIt(); }
+  });
+
+  /* ---------- phone remote demo ---------- */
+  var playing = true, songs = [["Kesariya", "Arijit Singh"], ["Tum Hi Ho", "Arijit Singh"], ["Kun Faya Kun", "A. R. Rahman"]], si = 0;
+  var PAUSE = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>', PLAY = '<path d="M8 5v14l11-7z"/>';
+  document.getElementById("phPlay").addEventListener("click", function () { playing = !playing; document.getElementById("phIcon").innerHTML = playing ? PAUSE : PLAY; });
+  document.querySelectorAll(".ph-ctrl [data-act]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      si = (si + (b.getAttribute("data-act") === "next" ? 1 : songs.length - 1)) % songs.length;
+      document.getElementById("phSong").textContent = songs[si][0];
+      document.querySelector(".ph-card em").textContent = songs[si][1];
+    });
+  });
+
+  /* ---------- tour: sticky screen follows the steps ---------- */
+  var steps = Array.prototype.slice.call(document.querySelectorAll(".step"));
+  var shots = document.querySelectorAll("#tourScreen img");
+  var prog = document.getElementById("tourProgress");
+  steps.forEach(function () { prog.appendChild(document.createElement("i")); });
+  var bars = prog.querySelectorAll("i");
+  function activate(i) {
+    steps.forEach(function (s, j) { s.classList.toggle("active", j === i); });
+    var k = steps[i].getAttribute("data-shot");
+    shots.forEach(function (img) { img.classList.toggle("on", img.getAttribute("data-k") === k); });
+    bars.forEach(function (b, j) { b.classList.toggle("on", j === i); });
+    document.getElementById("tourLabel").textContent = steps[i].querySelector(".eyebrow").textContent;
+  }
+  activate(0);
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) activate(steps.indexOf(e.target)); });
+    }, { rootMargin: "-45% 0px -45% 0px" });
+    steps.forEach(function (s) { io.observe(s); });
+  }
+
+  /* ---------- speed demo ---------- */
+  var sp = document.getElementById("speedNum"), v = 58, dir = 1;
+  if (!reduce) setInterval(function () {
+    v += dir; if (v >= 66) dir = -1; if (v <= 52) dir = 1;
+    sp.firstChild.nodeValue = v; sp.classList.toggle("over", v > 62);
+  }, 380);
+
+  /* ---------- GSAP scrollytelling ---------- */
+  if (reduce || !window.gsap || !window.ScrollTrigger) return;
+  gsap.registerPlugin(ScrollTrigger);
+  var mm = gsap.matchMedia();
+
+  mm.add("(min-width: 901px)", function () {
+    // Hero: the head unit straightens as you scroll, like pulling up to it.
+    gsap.to("#heroUnit", { rotateY: 0, rotateX: 0, rotateZ: 0, scale: 1.04, ease: "none",
+      scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
+
+    // The mess: scattered app tiles fly into one screen, which lights up.
+    var tl = gsap.timeline({ scrollTrigger: { trigger: "#messStage", start: "top top", end: "+=150%", scrub: 0.6, pin: true } });
+    tl.fromTo(".mess-line[data-m='0']", { opacity: 1 }, { opacity: 0.25, duration: 0.6 }, 0.4)
+      .fromTo(".mess-line[data-m='1']", { opacity: 0.25 }, { opacity: 1, duration: 0.5 }, 0.4)
+      .to(".tile", { x: function (i, el) { var b = el.parentNode.getBoundingClientRect(), r = el.getBoundingClientRect(); return (b.left + b.width / 2) - (r.left + r.width / 2); },
+                     y: function (i, el) { var b = el.parentNode.getBoundingClientRect(), r = el.getBoundingClientRect(); return (b.top + b.height / 2) - (r.top + r.height / 2); },
+                     scale: 0.2, opacity: 0, rotate: function (i) { return (i % 2 ? 1 : -1) * 25; }, stagger: 0.05, duration: 1 }, 0.9)
+      .fromTo(".mess-line[data-m='1']", { opacity: 1 }, { opacity: 0.25, duration: 0.5 }, 1.6)
+      .fromTo(".mess-line[data-m='2']", { opacity: 0.25 }, { opacity: 1, duration: 0.5 }, 1.6)
+      .to("#messShot", { opacity: 1, duration: 0.8 }, 1.7)
+      .fromTo(".mess-screen", { scale: 0.92 }, { scale: 1.06, duration: 1 }, 1.7);
+    gsap.set(".mess-line[data-m='1'], .mess-line[data-m='2']", { opacity: 0.25 });
+  });
+
+  // Route draws as the section scrolls into view.
+  var line = document.getElementById("routeLine"), casing = document.getElementById("routeCasing");
+  [line, casing].forEach(function (p) { var L = p.getTotalLength(); p.style.strokeDasharray = L; p.style.strokeDashoffset = 0; });
+  gsap.fromTo([line, casing], { strokeDashoffset: function (i, el) { return el.getTotalLength(); } }, { strokeDashoffset: 0, ease: "none",
+    scrollTrigger: { trigger: ".mapbox", start: "top 80%", end: "center 45%", scrub: true } });
+  gsap.fromTo(["#viaPin", "#destPin"], { scale: 0.4, transformOrigin: "center" }, { scale: 1, stagger: 0.3, ease: "back.out(2)",
+    scrollTrigger: { trigger: ".mapbox", start: "top 70%", end: "center 45%", scrub: true } });
+
+  // RAM bars fill when seen.
+  gsap.fromTo("#ramBars .bar i", { scaleX: 0.15 }, { scaleX: 1, stagger: 0.15, ease: "power2.out", duration: 1.2,
+    scrollTrigger: { trigger: "#ramBars", start: "top 85%" } });
+
+  // Phone floats in with a gentle parallax.
+  gsap.fromTo(".phone", { y: 60, rotate: -4 }, { y: -30, rotate: 2, ease: "none",
+    scrollTrigger: { trigger: ".remote", start: "top bottom", end: "bottom top", scrub: true } });
+})();
+</script>
+
+</body>
+</html>
