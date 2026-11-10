@@ -147,16 +147,16 @@ h1, h2, h3 { margin: 0; font-family: var(--display); text-wrap: balance; }
 .chapters { position: relative; overflow: hidden; }
 .ch-head { padding-top: 20px; }
 .ch-track { display: flex; width: max-content; will-change: transform; }
-.ch { width: 100vw; min-height: 100vh; flex: none; display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: clamp(24px, 4vw, 64px); align-items: center;
-  padding: calc(68px + 40px) var(--gr) 60px var(--gl); max-width: 100vw; }
-.ch-copy { display: grid; gap: 18px; padding-left: max(0px, calc((100vw - 1240px) / 2)); }
-.ch-copy h2 { font-size: clamp(40px, 5.6vw, 84px); }
+.ch { width: 100vw; min-height: 100vh; flex: none; display: grid; grid-template-columns: minmax(0, .82fr) minmax(0, 1.18fr); gap: clamp(24px, 4vw, 64px); align-items: center;
+  padding: calc(68px + 40px) max(var(--gr), calc((100vw - 1240px) / 2)) 60px max(var(--gl), calc((100vw - 1240px) / 2)); max-width: 100vw; }
+.ch-copy { display: grid; gap: 18px; min-width: 0; }
+.ch-copy h2 { font-size: clamp(32px, 3.7vw, 56px); font-stretch: 108%; hyphens: auto; overflow-wrap: break-word; }
 .ch-copy p { color: var(--muted); max-width: 44ch; font-size: 17px; }
 .ch-copy ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; font-size: 15px; }
 .ch-copy li { display: flex; gap: 12px; align-items: baseline; }
 .ch-copy li::before { content: ""; width: 16px; height: 2px; background: var(--amber); flex: none; transform: translateY(-4px); }
 .ch-count { font-family: var(--mono); font-size: 12px; color: var(--faint); letter-spacing: .12em; }
-.ch-visual { position: relative; padding-right: max(0px, calc((100vw - 1240px) / 2)); }
+.ch-visual { position: relative; min-width: 0; }
 .frame { position: relative; border-radius: 20px; padding: 10px; background: linear-gradient(160deg, #262C36, #0B0E13 55%, #191E26); box-shadow: 0 50px 90px -40px rgba(0,0,0,.95), 0 0 120px -60px rgba(76,147,255,.6); }
 .frame img { border-radius: 11px; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
 .callout { position: absolute; display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 999px; font-size: 13.5px; font-weight: 600; white-space: nowrap;
@@ -197,28 +197,107 @@ h1, h2, h3 { margin: 0; font-family: var(--display); text-wrap: balance; }
 .limit-demo .spd.over { color: var(--stop); }
 @media (max-width: 960px) { .india { grid-template-columns: minmax(0, 1fr); } }
 
-/* ---------- share flight ---------- */
-.share { padding-block: clamp(90px, 12vw, 160px); }
-.share-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 64px); align-items: center; }
-.share h2 { font-size: clamp(36px, 4.8vw, 68px); }
-.flight { position: relative; aspect-ratio: 5 / 4; max-width: 100%; }
-.flight svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-.mini-phone { position: absolute; left: 0; top: 14%; width: 30%; aspect-ratio: 9 / 18; border-radius: 22px; padding: 6px; background: linear-gradient(160deg, #2A303A, #0C0F14); box-shadow: 0 30px 60px -25px #000; }
-.mini-phone .in { width: 100%; height: 100%; border-radius: 17px; background: #E8ECEF; overflow: hidden; position: relative; }
-.mini-phone .sheet { position: absolute; left: 6%; right: 6%; bottom: 5%; border-radius: 12px; background: #fff; padding: 9% 9%; display: grid; gap: 6px; color: #10151C; font-size: clamp(8px, 1vw, 11px); }
-.mini-phone .sheet b { font-size: clamp(9px, 1.15vw, 13px); }
-.mini-phone .sheet .row { display: flex; gap: 6px; }
-.mini-phone .sheet .row i { font-style: normal; padding: 4px 7px; border-radius: 999px; background: #EEF1F5; }
-.mini-phone .sheet .row i.on { background: var(--route); color: #fff; }
-.mini-car { position: absolute; right: 0; bottom: 6%; width: 64%; border-radius: 16px; padding: 7px; background: linear-gradient(160deg, #262C36, #0B0E13); box-shadow: 0 30px 70px -30px #000, 0 0 90px -50px rgba(76,147,255,.8); }
-.mini-car .in { aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; background: var(--land); position: relative; }
-.mini-car .in svg { position: absolute; inset: 0; }
-.mini-card { position: absolute; left: 4%; bottom: 6%; padding: 6px 10px; border-radius: 9px; background: rgba(12,14,18,.94); font-size: clamp(9px, 1.05vw, 12px); }
-.mini-card b { display: block; font-size: 1.1em; }
-.mini-card span { color: var(--go); font-family: var(--mono); }
-.steps-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; font-family: var(--mono); font-size: 13px; color: var(--muted); align-items: center; }
-.steps-row b { color: var(--text); font-weight: 500; padding: 7px 12px; border-radius: 10px; background: var(--raise); border: 1px solid var(--line); }
-@media (max-width: 960px) { .share-grid { grid-template-columns: minmax(0, 1fr); } }
+/* ---------- realistic phone (shared by the share demo and the remote) ---------- */
+.iphone { position: relative; width: 100%; aspect-ratio: 9 / 19.5; border-radius: 17% / 7.8%; padding: 3.4%;
+  background: linear-gradient(135deg, #5B616B 0%, #2A2E35 18%, #16191E 45%, #30353D 75%, #4A5059 100%);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), inset 0 0 0 4px #0A0C0F, 0 0 0 1px rgba(0,0,0,.7), 0 50px 90px -35px rgba(0,0,0,.95), 0 20px 40px -20px rgba(0,0,0,.8); }
+.iphone .btn-side { position: absolute; width: 3px; border-radius: 2px; background: linear-gradient(90deg, #262A31, #4A5059); }
+.iphone .b1 { left: -3px; top: 19%; height: 5%; } .iphone .b2 { left: -3px; top: 27%; height: 9%; } .iphone .b3 { left: -3px; top: 38%; height: 9%; } .iphone .b4 { right: -3px; top: 29%; height: 14%; }
+.iphone .glass { position: relative; width: 100%; height: 100%; border-radius: 14% / 6.6%; overflow: hidden; background: #000; isolation: isolate; }
+.iphone .glass::after { content: ""; position: absolute; inset: 0; z-index: 30; pointer-events: none; background: linear-gradient(118deg, rgba(255,255,255,.14) 0%, rgba(255,255,255,.03) 28%, transparent 40%); }
+.iphone .island { position: absolute; top: 1.6%; left: 50%; width: 28%; height: 4.2%; transform: translateX(-50%); border-radius: 999px; background: #000; z-index: 25; }
+.iphone .status { position: absolute; top: 0; left: 0; right: 0; height: 7.2%; display: flex; align-items: center; justify-content: space-between; padding: 0 7% 0 12%; z-index: 24; font: 600 clamp(9px, 1vw, 12.5px)/1 var(--body); }
+.iphone .status .ic { display: flex; gap: 3px; align-items: center; }
+.iphone .status svg { height: 0.95em; width: auto; }
+.iphone .homebar { position: absolute; bottom: 1.3%; left: 50%; width: 36%; height: 4px; transform: translateX(-50%); border-radius: 4px; z-index: 24; }
+.iphone.light .status { color: #0B0F14; } .iphone.light .homebar { background: rgba(0,0,0,.55); }
+.iphone.dark .status { color: #F2F4F7; } .iphone.dark .homebar { background: rgba(255,255,255,.6); }
+
+/* ---------- share demo (plays like a video) ---------- */
+.share { padding-block: clamp(90px, 12vw, 150px); }
+.share-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 64px); align-items: end; }
+.share h2 { font-size: clamp(34px, 4.2vw, 62px); }
+.demo { margin-top: clamp(36px, 5vw, 64px); border-radius: 28px; border: 1px solid var(--line); background: radial-gradient(70% 90% at 70% 40%, rgba(76,147,255,.10), transparent 70%), var(--night); padding: clamp(18px, 3vw, 36px); }
+.demo-stage { position: relative; display: grid; grid-template-columns: minmax(0, 0.42fr) minmax(0, 1fr); gap: clamp(20px, 4vw, 60px); align-items: center; }
+.demo-phone { width: min(290px, 100%); margin: 0 auto; }
+.gm { position: absolute; inset: 0; background: #E9EDF0; font-family: var(--body); color: #12161C; }
+.gm-map { position: absolute; inset: 0; transform-origin: 58% 46%; }
+.gm-map svg { width: 100%; height: 100%; display: block; }
+.gm-search { position: absolute; top: 8.5%; left: 5%; right: 5%; height: 6.4%; border-radius: 999px; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,.18); display: flex; align-items: center; gap: 8px; padding: 0 12px; font-size: clamp(10px, 1.1vw, 13px); z-index: 5; }
+.gm-search .ph { color: #6B7280; }
+.gm-search .typed { color: #111; white-space: nowrap; overflow: hidden; }
+.gm-search .caret { width: 1.5px; height: 1.1em; background: #1A73E8; animation: caret 1s steps(1) infinite; }
+@keyframes caret { 50% { opacity: 0; } }
+.gm-results { position: absolute; top: 16%; left: 5%; right: 5%; border-radius: 14px; background: #fff; box-shadow: 0 6px 20px rgba(0,0,0,.18); overflow: hidden; z-index: 5; font-size: clamp(9.5px, 1vw, 12.5px); }
+.gm-results div { padding: 10px 12px; display: grid; gap: 1px; border-bottom: 1px solid #EEF0F2; }
+.gm-results div:last-child { border-bottom: 0; }
+.gm-results b { font-weight: 600; }
+.gm-results span { color: #6B7280; font-size: .9em; }
+.gm-pin { position: absolute; left: 58%; top: 46%; width: 9%; transform: translate(-50%, -100%); z-index: 3; }
+.gm-card { position: absolute; left: 0; right: 0; bottom: 0; border-radius: 20px 20px 0 0; background: #fff; padding: 9% 7% 12%; box-shadow: 0 -6px 24px rgba(0,0,0,.15); z-index: 6; display: grid; gap: 4px; font-size: clamp(9.5px, 1vw, 12.5px); }
+.gm-card .grab { width: 12%; height: 4px; border-radius: 4px; background: #D6DAE0; justify-self: center; margin-top: -4%; margin-bottom: 4%; }
+.gm-card h4 { margin: 0; font: 600 clamp(14px, 1.6vw, 19px)/1.2 var(--body); }
+.gm-card .sub { color: #6B7280; }
+.gm-card .stars { color: #E8A100; letter-spacing: 1px; }
+.gm-actions { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.gm-actions i { font-style: normal; padding: 6px 10px; border-radius: 999px; border: 1px solid #D6DAE0; color: #1A73E8; font-weight: 600; font-size: .92em; }
+.gm-actions i.dir { background: #1A73E8; color: #fff; border-color: #1A73E8; }
+.gm-actions i.sh { transition: background .2s; }
+.gm-actions i.sh.hit { background: #D2E3FC; }
+.gm-scrim { position: absolute; inset: 0; background: rgba(0,0,0,.42); z-index: 8; }
+.gm-sheet { position: absolute; left: 0; right: 0; bottom: 0; border-radius: 22px 22px 0 0; background: #fff; padding: 7% 6% 14%; z-index: 9; font-size: clamp(9px, .95vw, 12px); display: grid; gap: 12px; }
+.gm-sheet .t { font-weight: 600; font-size: 1.15em; }
+.gm-sheet .link { display: flex; gap: 8px; align-items: center; padding: 8px 10px; border-radius: 12px; background: #F1F3F4; color: #3C4043; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gm-apps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; text-align: center; }
+.gm-apps div { display: grid; justify-items: center; gap: 5px; color: #3C4043; }
+.gm-apps .ico { width: 78%; aspect-ratio: 1; border-radius: 30%; display: grid; place-items: center; }
+.gm-apps .ico svg { width: 50%; height: 50%; }
+.gm-apps .av .ico { background: #0B0E13; box-shadow: 0 0 0 0 rgba(76,147,255,.6); }
+.gm-apps .av .ico img { width: 70%; }
+.gm-apps .av.hit .ico { box-shadow: 0 0 0 5px rgba(76,147,255,.45); }
+.finger { position: absolute; width: 13%; aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,.55); border: 2px solid rgba(255,255,255,.9); box-shadow: 0 4px 14px rgba(0,0,0,.35); z-index: 20; transform: translate(-50%, -50%); pointer-events: none; opacity: 0; }
+.car-unit { position: relative; border-radius: 22px; padding: 12px 14px; background: linear-gradient(155deg, #2B323D, #0B0E13 50%, #1B212A); box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 50px 100px -40px #000, 0 0 140px -60px rgba(76,147,255,.8); }
+.car-unit .screen { border-radius: 11px; }
+.cu-map { position: absolute; inset: 0; }
+.cu-map svg { width: 100%; height: 100%; display: block; }
+.cu-search { position: absolute; left: 3.5%; bottom: 5%; width: 46%; height: 11%; border-radius: 12px; background: rgba(18,20,24,.95); border: 1px solid rgba(255,255,255,.08); display: flex; align-items: center; padding: 0 12px; color: var(--muted); font-size: clamp(9px, 1.1vw, 13px); }
+.cu-toast { position: absolute; top: 5%; left: 50%; transform: translateX(-50%); padding: 7px 14px; border-radius: 999px; background: rgba(18,20,24,.96); border: 1px solid rgba(255,255,255,.1); font-size: clamp(9px, 1.05vw, 13px); white-space: nowrap; display: flex; gap: 8px; align-items: center; z-index: 4; }
+.cu-toast::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--go); }
+.cu-card { position: absolute; left: 50%; bottom: 5%; transform: translateX(-50%); width: min(60%, 360px); padding: 3% 4%; border-radius: 14px; background: rgba(18,20,24,.97); box-shadow: 0 12px 30px rgba(0,0,0,.5); display: grid; gap: 4px; font-size: clamp(9px, 1.05vw, 13px); z-index: 4; }
+.cu-card b { font-size: 1.25em; }
+.cu-card span { color: var(--muted); }
+.cu-card em { font-style: normal; color: var(--go); font-weight: 600; }
+.cu-card .row { display: flex; gap: 8px; margin-top: 4px; align-items: center; }
+.cu-card .start { padding: 6px 14px; border-radius: 999px; background: var(--route); color: #03101F; font-weight: 700; transition: transform .15s; }
+.cu-card .start.hit { transform: scale(.92); }
+.cu-card .cancel { color: var(--text); font-weight: 600; }
+.cu-turn { position: absolute; left: 3%; top: 5%; display: flex; gap: 10px; align-items: center; padding: 8px 12px 8px 8px; border-radius: 12px; background: rgba(18,20,24,.95); z-index: 4; }
+.cu-turn .ar { width: clamp(26px, 3.4vw, 42px); aspect-ratio: 1; border-radius: 9px; background: var(--route); display: grid; place-items: center; }
+.cu-turn .ar svg { width: 70%; height: 70%; }
+.cu-turn b { display: block; font-family: var(--display); font-weight: 800; font-size: clamp(13px, 1.8vw, 22px); line-height: 1; }
+.cu-turn span { font-size: clamp(8.5px, .95vw, 12px); color: var(--muted); }
+.cu-eta { position: absolute; left: 3%; right: 3%; bottom: 5%; display: flex; gap: 10px; align-items: center; padding: 7px 12px; border-radius: 12px; background: rgba(18,20,24,.95); z-index: 4; }
+.cu-eta b { color: var(--go); font-family: var(--display); font-weight: 800; font-size: clamp(11px, 1.5vw, 18px); }
+.cu-eta span { flex: 1; color: var(--muted); font-size: clamp(8.5px, .95vw, 12px); }
+.cu-eta i { font-style: normal; padding: 4px 10px; border-radius: 999px; background: var(--stop); color: #200605; font-size: clamp(8.5px, .95vw, 12px); font-weight: 600; }
+.cu-finger { width: 7%; }
+.packet { position: absolute; left: 0; top: 0; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; background: var(--route); box-shadow: 0 0 0 8px rgba(76,147,255,.2), 0 0 40px rgba(76,147,255,.8); display: grid; place-items: center; z-index: 30; opacity: 0; pointer-events: none; }
+.packet svg { width: 22px; height: 22px; }
+.demo-bar { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; align-items: center; margin-top: clamp(18px, 3vw, 30px); }
+.demo-play { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--raise); color: var(--text); display: grid; place-items: center; cursor: pointer; }
+.demo-play svg { width: 18px; height: 18px; }
+.demo-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.dstep { display: grid; gap: 8px; font-size: 13.5px; color: var(--faint); min-width: 0; }
+.dstep .bar { height: 3px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.dstep .bar i { display: block; height: 100%; width: 0; background: var(--route); }
+.dstep.on { color: var(--text); }
+.dstep b { font-family: var(--mono); font-weight: 500; font-size: 11.5px; color: var(--amber); letter-spacing: .08em; }
+@media (max-width: 960px) {
+  .share-head { grid-template-columns: minmax(0, 1fr); }
+  .demo-stage { grid-template-columns: minmax(0, 1fr); }
+  .demo-phone { width: min(240px, 70%); }
+  .demo-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 
 /* ---------- speakers ---------- */
 .speakers { padding-block: clamp(90px, 12vw, 150px); background: radial-gradient(60% 60% at 70% 50%, rgba(76,147,255,.08), transparent 70%); }
@@ -250,11 +329,10 @@ h1, h2, h3 { margin: 0; font-family: var(--display); text-wrap: balance; }
 .way .ico svg { width: 21px; height: 21px; }
 .way strong { display: block; }
 .way span { color: var(--muted); font-size: 15px; }
-.phone { width: min(310px, 100%); margin: 0 auto; border-radius: 44px; padding: 12px; background: linear-gradient(160deg, #2B313C, #0B0E13); box-shadow: 0 50px 90px -35px #000, inset 0 1px 0 rgba(255,255,255,.07); }
-.phone-in { border-radius: 33px; background: #07090C; padding: 34px 16px 22px; display: grid; gap: 12px; position: relative; }
-.phone-in::before { content: ""; position: absolute; top: 10px; left: 50%; width: 84px; height: 22px; margin-left: -42px; border-radius: 12px; background: #000; }
+.phone { width: min(300px, 100%); margin: 0 auto; }
+.phone-in { position: absolute; inset: 0; padding: 17% 6% 9%; display: grid; gap: 10px; align-content: start; background: #07090C; }
 .ph-top { display: flex; justify-content: space-between; align-items: center; }
-.ph-top b { font-family: var(--display); font-weight: 800; font-size: 16px; }
+.ph-top b { font-family: var(--display); font-weight: 800; font-size: 14px; white-space: nowrap; }
 .ph-top span { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 11.5px; }
 .ph-top span::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--go); }
 .ph-card { background: var(--land); border-radius: 18px; padding: 14px; display: grid; gap: 4px; }
@@ -405,7 +483,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space
     <article class="ch">
       <div class="ch-copy">
         <span class="ch-count">Home</span>
-        <h2 class="big">Every&shy;thing at a glance</h2>
+        <h2 class="big">Everything at a glance</h2>
         <p>The live map takes most of the screen, with music and a huge speed readout beside it. One look tells you where you are, what's playing and how fast you're going.</p>
         <ul><li>Clock and temperature in the side rail</li><li>Choose what stays on Home</li><li>Full screen, dark by default</li></ul>
       </div>
@@ -518,36 +596,101 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space
   </div>
 </section>
 
-<!-- ================= SHARE FLIGHT ================= -->
+<!-- ================= SHARE DEMO (plays like a video) ================= -->
 <section class="share" id="share">
-  <div class="wrap share-grid">
-    <div>
-      <div class="label">Share from Google Maps</div>
-      <h2 class="big" style="margin-top:18px">Found it on your phone? Send it to the car.</h2>
-      <p class="lede" style="margin-top:22px">Village not on the map? Find it in Google Maps, tap Share and pick AutoVerse. The destination and every stop you added open on the car screen.</p>
-      <div class="steps-row"><b>Google Maps</b>→<b>Share</b>→<b>AutoVerse</b>→<b>Start</b></div>
+  <div class="wrap">
+    <div class="share-head">
+      <div>
+        <div class="label">Share from Google Maps</div>
+        <h2 class="big" style="margin-top:18px">Find it on your phone. Drive it on the car.</h2>
+      </div>
+      <p class="lede">Search any place in Google Maps, tap Share and pick AutoVerse. The place, and every stop you added, opens on the car screen with the route ready. Watch it happen.</p>
     </div>
-    <div class="flight" id="flight" aria-label="A place travels from the phone to the car screen and the route appears">
-      <div class="mini-phone"><div class="in">
-        <svg viewBox="0 0 90 180" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%"><rect width="90" height="180" fill="#E8ECEF"/><path d="M0 60 L90 40 M20 0 L35 180 M70 0 L60 180 M0 120 L90 110" stroke="#fff" stroke-width="5"/><path d="M0 90 L90 76" stroke="#F6C26B" stroke-width="5"/><circle cx="52" cy="58" r="6" fill="#EA4335"/></svg>
-        <div class="sheet"><b>Asandra</b><span>Uttar Pradesh</span><div class="row"><i>Save</i><i class="on">Share</i></div></div>
-      </div></div>
-      <div class="mini-car"><div class="in">
-        <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice">
-          <rect width="320" height="180" fill="#10141A"/>
-          <g stroke="#232A35" stroke-width="5" fill="none"><path d="M0 120 L320 96"/><path d="M80 0 L110 180"/><path d="M230 0 L215 180"/><path d="M0 50 L320 34"/></g>
-          <path d="M0 116 L320 92" stroke="#C0853D" stroke-width="3" opacity=".7"/>
-          <rect x="250" y="120" width="50" height="34" rx="5" fill="#122A21"/>
-          <path id="carRouteCase" d="M100 165 L96 128 L150 108 L222 96 L226 60 L224 42" stroke="#0A2A66" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-          <path id="carRoute" d="M100 165 L96 128 L150 108 L222 96 L226 60 L224 42" stroke="#4C93FF" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-          <circle cx="224" cy="42" r="7" fill="#FF5A52" stroke="#fff" stroke-width="2.5" id="carPin"/>
-        </svg>
-        <div class="mini-card"><b>Asandra</b><span>38 min · 31 km</span></div>
-      </div></div>
-      <svg viewBox="0 0 500 400" aria-hidden="true">
-        <path id="flightPath" d="M110 170 C 190 40, 330 40, 400 190" fill="none" stroke="rgba(76,147,255,.45)" stroke-width="2" stroke-dasharray="4 7"/>
-        <g id="packet"><circle r="12" fill="#4C93FF"/><circle r="22" fill="none" stroke="#4C93FF" stroke-opacity=".35" stroke-width="2"/><path d="M-4 -5 L5 0 L-4 5 Z" fill="#03101F"/></g>
-      </svg>
+
+    <div class="demo" id="demo">
+      <div class="demo-stage" id="demoStage">
+        <!-- phone: Google Maps -->
+        <div class="demo-phone">
+          <div class="iphone light">
+            <span class="btn-side b1"></span><span class="btn-side b2"></span><span class="btn-side b3"></span><span class="btn-side b4"></span>
+            <div class="glass">
+              <div class="status"><span>9:41</span><span class="ic">
+                <svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx="1" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx="1" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx="1" fill="currentColor"/></svg>
+                <svg viewBox="0 0 16 12"><path d="M8 11.5 5.6 9a3.4 3.4 0 0 1 4.8 0L8 11.5Zm-4.3-4.3-1.6-1.6a8.4 8.4 0 0 1 11.8 0l-1.6 1.6a6.1 6.1 0 0 0-8.6 0ZM0 3.4 0 3.4A11.3 11.3 0 0 1 16 3.4l-1.5 1.5a9.2 9.2 0 0 0-13 0L0 3.4Z" fill="currentColor"/></svg>
+                <svg viewBox="0 0 27 12"><rect x=".5" y=".5" width="22" height="11" rx="3.2" fill="none" stroke="currentColor" opacity=".45"/><rect x="2" y="2" width="16" height="8" rx="2" fill="currentColor"/><rect x="24" y="4" width="2" height="4" rx="1" fill="currentColor" opacity=".45"/></svg>
+              </span></div>
+              <div class="island"></div>
+              <div class="gm">
+                <div class="gm-map" id="gmMap">
+                  <svg viewBox="0 0 270 585" preserveAspectRatio="xMidYMid slice">
+                    <rect width="270" height="585" fill="#E9EDF0"/>
+                    <path d="M160 300 h70 v60 h-70z" fill="#CDE9D3"/><path d="M20 120 h60 v50 h-60z" fill="#CDE9D3"/>
+                    <path d="M0 470 Q120 440 270 500 V585 H0Z" fill="#A9D3F5"/>
+                    <g stroke="#fff" stroke-width="9" fill="none" stroke-linecap="round"><path d="M-10 200 L280 170"/><path d="M60 -10 L90 600"/><path d="M200 -10 L180 600"/><path d="M-10 380 L280 350"/><path d="M-10 60 L280 40"/></g>
+                    <g stroke="#FCD989" stroke-width="10" fill="none"><path d="M-10 280 L280 255"/></g>
+                    <g stroke="#fff" stroke-width="4" fill="none"><path d="M120 -10 L140 600"/><path d="M-10 120 L280 100"/><path d="M240 -10 L230 600"/></g>
+                  </svg>
+                </div>
+                <svg class="gm-pin" id="gmPin" viewBox="0 0 24 34"><path d="M12 0C5.4 0 0 5.2 0 11.7 0 20.4 12 34 12 34s12-13.6 12-22.3C24 5.2 18.6 0 12 0Z" fill="#EA4335"/><circle cx="12" cy="11.5" r="4.4" fill="#A50E0E"/></svg>
+                <div class="gm-search"><svg viewBox="0 0 24 24" width="14" height="14"><circle cx="11" cy="11" r="7" fill="none" stroke="#5F6368" stroke-width="2.4"/><path d="m20 20-4-4" stroke="#5F6368" stroke-width="2.4" stroke-linecap="round"/></svg><span class="ph" id="gmPh">Search here</span><span class="typed" id="gmTyped"></span><span class="caret" id="gmCaret"></span></div>
+                <div class="gm-results" id="gmResults"><div><b>Hawa Mahal</b><span>Badi Choupad, Jaipur, Rajasthan</span></div><div><b>Hawa Mahal Road</b><span>Jaipur, Rajasthan</span></div></div>
+                <div class="gm-card" id="gmCard"><div class="grab"></div><h4>Hawa Mahal</h4><span class="stars">★★★★★ <span class="sub">4.5 · Palace</span></span><span class="sub">Badi Choupad, Jaipur, Rajasthan</span>
+                  <div class="gm-actions"><i class="dir">Directions</i><i>Save</i><i class="sh" id="gmShare">Share</i></div></div>
+                <div class="gm-scrim" id="gmScrim"></div>
+                <div class="gm-sheet" id="gmSheet">
+                  <span class="t">Share</span>
+                  <div class="link">maps.app.goo.gl/…</div>
+                  <div class="gm-apps">
+                    <div><span class="ico" style="background:#E8F0FE"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4V5Z" fill="#1A73E8"/></svg></span>Messages</div>
+                    <div><span class="ico" style="background:#F1F3F4"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="11" height="11" rx="2" fill="none" stroke="#3C4043" stroke-width="2"/><path d="M5 15V6a1 1 0 0 1 1-1h9" fill="none" stroke="#3C4043" stroke-width="2"/></svg></span>Copy</div>
+                    <div class="av" id="gmAv"><span class="ico"><img src="img/mark.png" alt=""></span>AutoVerse</div>
+                    <div><span class="ico" style="background:#E6F4EA"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="#188038"/><path d="M5 12a7 7 0 0 1 14 0M2 12a10 10 0 0 1 20 0" fill="none" stroke="#188038" stroke-width="2"/></svg></span>Nearby</div>
+                  </div>
+                </div>
+                <span class="finger" id="fPhone"></span>
+              </div>
+              <div class="homebar"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- car head unit: AutoVerse -->
+        <div class="car-unit" id="carUnit">
+          <div class="screen">
+            <div class="cu-map">
+              <svg viewBox="0 0 640 360" preserveAspectRatio="xMidYMid slice">
+                <rect width="640" height="360" fill="#10141A"/>
+                <path d="M420 40 h120 v80 h-120z" fill="#122A21"/><path d="M60 230 h90 v70 h-90z" fill="#122A21"/>
+                <path d="M0 330 Q300 300 640 345 V360 H0Z" fill="#0D2238"/>
+                <g stroke="#2E3644" stroke-width="10" fill="none"><path d="M0 120 L640 96"/><path d="M180 0 L210 360"/><path d="M470 0 L450 360"/><path d="M0 260 L640 236"/></g>
+                <path d="M0 190 L640 170" stroke="#B07C3C" stroke-width="12"/>
+                <g stroke="#262D38" stroke-width="5" fill="none"><path d="M320 0 L330 360"/><path d="M0 40 L640 24"/><path d="M590 0 L585 360"/><path d="M90 0 L100 360"/></g>
+                <path id="cuRouteCase" d="M205 330 L200 262 L330 246 L330 178 L455 166 L460 104 L520 98" stroke="#0A2A66" stroke-width="16" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <path id="cuRoute" d="M205 330 L200 262 L330 246 L330 178 L455 166 L460 104 L520 98" stroke="#4C93FF" stroke-width="9" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <g id="cuPin"><circle cx="520" cy="98" r="11" fill="#FF5A52" stroke="#fff" stroke-width="4"/></g>
+                <g id="cuCar"><circle cx="205" cy="330" r="12" fill="#fff"/><circle cx="205" cy="330" r="8" fill="#4C93FF"/></g>
+              </svg>
+            </div>
+            <div class="cu-search" id="cuSearch"><span class="hindi">कहाँ जाना है?</span></div>
+            <div class="cu-toast" id="cuToast">Place received from Google Maps</div>
+            <div class="cu-card" id="cuCard"><b>Hawa Mahal</b><span>Badi Choupad, Jaipur</span><em>24 min · 9.8 km · arrive 10:05</em><div class="row"><span class="start" id="cuStart">Start</span><span class="cancel">Cancel</span></div></div>
+            <div class="cu-turn" id="cuTurn"><span class="ar"><svg viewBox="0 0 24 24"><path d="M6 20v-7a4 4 0 0 1 4-4h8m0 0-4-4m4 4-4 4" fill="none" stroke="#03101F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><b>300 m</b><span>Turn right onto MI Road · <span class="hindi">दाएँ मुड़ें</span></span></div></div>
+            <div class="cu-eta" id="cuEta"><b>10:05</b><span>24 min · 9.8 km</span><i>End</i></div>
+            <span class="finger cu-finger" id="fCar"></span>
+          </div>
+        </div>
+        <div class="packet" id="packet"><svg viewBox="0 0 24 24"><path d="M12 2C8 2 5 5 5 9c0 5.3 7 13 7 13s7-7.7 7-13c0-4-3-7-7-7Z" fill="#03101F"/><circle cx="12" cy="9" r="2.6" fill="#4C93FF"/></svg></div>
+      </div>
+
+      <div class="demo-bar">
+        <button class="demo-play" type="button" id="demoPlay" aria-label="Pause the demo"><svg viewBox="0 0 24 24" fill="currentColor" id="demoIcon"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg></button>
+        <div class="demo-steps">
+          <div class="dstep" data-s="0"><div class="bar"><i></i></div><b>STEP 1</b>Search in Google Maps</div>
+          <div class="dstep" data-s="1"><div class="bar"><i></i></div><b>STEP 2</b>Tap Share</div>
+          <div class="dstep" data-s="2"><div class="bar"><i></i></div><b>STEP 3</b>Pick AutoVerse</div>
+          <div class="dstep" data-s="3"><div class="bar"><i></i></div><b>STEP 4</b>The route opens in the car</div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -596,6 +739,15 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space
       </div>
     </div>
     <div class="phone" id="phone" aria-label="AutoVerse Remote on a phone">
+      <div class="iphone dark">
+      <span class="btn-side b1"></span><span class="btn-side b2"></span><span class="btn-side b3"></span><span class="btn-side b4"></span>
+      <div class="glass">
+      <div class="status"><span>9:41</span><span class="ic">
+        <svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx="1" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx="1" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx="1" fill="currentColor"/></svg>
+        <svg viewBox="0 0 16 12"><path d="M8 11.5 5.6 9a3.4 3.4 0 0 1 4.8 0L8 11.5Zm-4.3-4.3-1.6-1.6a8.4 8.4 0 0 1 11.8 0l-1.6 1.6a6.1 6.1 0 0 0-8.6 0ZM0 3.4A11.3 11.3 0 0 1 16 3.4l-1.5 1.5a9.2 9.2 0 0 0-13 0L0 3.4Z" fill="currentColor"/></svg>
+        <svg viewBox="0 0 27 12"><rect x=".5" y=".5" width="22" height="11" rx="3.2" fill="none" stroke="currentColor" opacity=".45"/><rect x="2" y="2" width="16" height="8" rx="2" fill="currentColor"/><rect x="24" y="4" width="2" height="4" rx="1" fill="currentColor" opacity=".45"/></svg>
+      </span></div>
+      <div class="island"></div>
       <div class="phone-in">
         <div class="ph-top"><b>AutoVerse Remote</b><span>Connected to car</span></div>
         <div class="ph-card">
@@ -610,6 +762,9 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space
         </div>
         <div class="ph-card"><small>ON THE WAY</small><div class="ph-eta">Arrive 11:50</div><em>Connaught Place · 6 min · 3.7 km</em></div>
         <div class="ph-card"><small>SEND A PLACE TO THE CAR</small><div class="ph-send"><div>maps.app.goo.gl/…</div><b>Go</b></div></div>
+      </div>
+      <div class="homebar"></div>
+      </div>
       </div>
     </div>
   </div>
@@ -898,19 +1053,99 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space
     el.firstChild.nodeValue = prefix + to; if (small) el.appendChild(small);
   });
 
-  // Share: the place flies from the phone to the car, then the route draws.
-  var fp = document.getElementById("flightPath"), packet = document.getElementById("packet"), len = fp.getTotalLength();
-  var routes = [document.getElementById("carRoute"), document.getElementById("carRouteCase")];
-  routes.forEach(function (r) { var L = r.getTotalLength(); r.style.strokeDasharray = L; r.style.strokeDashoffset = L; });
-  function setPacket(t) { var pt = fp.getPointAtLength(len * t); packet.setAttribute("transform", "translate(" + pt.x + " " + pt.y + ") scale(" + (1 - Math.abs(t - .5) * .5) + ")"); packet.style.opacity = t >= 0.99 ? 0 : 1; }
-  setPacket(0);
-  ScrollTrigger.create({ trigger: "#flight", start: "top 75%", end: "bottom 50%", scrub: reduce ? false : 0.5,
-    onUpdate: function (self) {
-      var pr = reduce ? 1 : self.progress, t = Math.min(1, pr / 0.55), r = Math.max(0, (pr - 0.5) / 0.5);
-      setPacket(t); routes.forEach(function (el) { el.style.strokeDashoffset = el.getTotalLength() * (1 - r); });
-    } });
+  // ===== Share demo: a looping "video" of Google Maps → Share → AutoVerse → route in the car =====
+  (function shareDemo() {
+    var $ = function (s) { return document.querySelector(s); };
+    var stage = $("#demoStage"), gm = $(".gm"), scr = $("#carUnit .screen");
+    var typed = $("#gmTyped"), text = "Hawa Mahal, Jaipur", typing = { n: 0 };
+    var route = $("#cuRoute"), routeCase = $("#cuRouteCase"), RL = route.getTotalLength(), RCL = routeCase.getTotalLength();
+    function rel(el, box) { var a = el.getBoundingClientRect(), b = box.getBoundingClientRect(); return { x: (a.left + a.width / 2 - b.left) / b.width * 100, y: (a.top + a.height / 2 - b.top) / b.height * 100 }; }
+    function px(el) { var a = el.getBoundingClientRect(), b = stage.getBoundingClientRect(); return { x: a.left + a.width / 2 - b.left, y: a.top + a.height / 2 - b.top }; }
+    function at(el, box, axis) { return function () { return rel(el, box)[axis] + "%"; }; }
+    var steps = document.querySelectorAll(".dstep"), cuts = [0, 3.7, 7.3, 8.9, 14.2];
+    function paintSteps(t) {
+      steps.forEach(function (s, i) { var p = Math.max(0, Math.min(1, (t - cuts[i]) / (cuts[i + 1] - cuts[i]))); s.querySelector(".bar i").style.width = (p * 100) + "%"; s.classList.toggle("on", t >= cuts[i] && t < cuts[i + 1] + (i === 3 ? 1 : 0)); });
+    }
+    var fly = { t: 0 }, p0, p1;
+    function flyUpdate() {
+      var t = fly.t, c = { x: (p0.x + p1.x) / 2, y: Math.min(p0.y, p1.y) - Math.abs(p1.x - p0.x) * 0.25 - 40 };
+      var x = (1 - t) * (1 - t) * p0.x + 2 * (1 - t) * t * c.x + t * t * p1.x, y = (1 - t) * (1 - t) * p0.y + 2 * (1 - t) * t * c.y + t * t * p1.y;
+      gsap.set("#packet", { x: x, y: y, scale: 1 - Math.abs(t - 0.5) * 0.4 });
+    }
+    var tl = gsap.timeline({ repeat: -1, paused: true, onUpdate: function () { paintSteps(tl.time()); } });
+    tl.set("#demoStage", { opacity: 0 })
+      .set("#gmResults, #gmScrim, #gmCaret, #packet, #cuToast, #cuCard, #cuTurn, #cuEta, #cuPin, #fPhone, #fCar", { autoAlpha: 0 })
+      .set("#gmCard, #gmSheet", { yPercent: 110 })
+      .set("#gmPin", { autoAlpha: 0, y: -40 })
+      .set("#gmMap", { scale: 1 })
+      .set("#gmPh", { display: "inline" })
+      .set("#cuSearch", { autoAlpha: 1 })
+      .set("#cuToast", { y: -12 }).set("#cuCard", { y: 24 }).set("#cuTurn", { x: -24 }).set("#cuEta", { y: 24 })
+      .set("#fPhone", { left: "50%", top: "62%", scale: 1 }).set("#fCar", { left: "62%", top: "62%", scale: 1 })
+      .call(function () { typed.textContent = ""; typing.n = 0; ["#gmShare", "#gmAv", "#cuStart"].forEach(function (s) { $(s).classList.remove("hit"); });
+        route.style.strokeDasharray = RL; route.style.strokeDashoffset = RL; routeCase.style.strokeDasharray = RCL; routeCase.style.strokeDashoffset = RCL; })
+      .to("#demoStage", { opacity: 1, duration: 0.4 })
+      // STEP 1: search in Google Maps
+      .to("#fPhone", { autoAlpha: 1, left: at($(".gm-search"), gm, "x"), top: at($(".gm-search"), gm, "y"), duration: 0.6, ease: "power2.inOut" }, 0.3)
+      .to("#fPhone", { scale: 0.75, duration: 0.12, yoyo: true, repeat: 1 }, 0.95)
+      .set("#gmPh", { display: "none" }, 1.1).set("#gmCaret", { autoAlpha: 1 }, 1.1)
+      .to("#fPhone", { autoAlpha: 0, duration: 0.25 }, 1.15)
+      .fromTo(typing, { n: 0 }, { n: text.length, duration: 1.4, ease: "none", onUpdate: function () { typed.textContent = text.slice(0, Math.round(typing.n)); } }, 1.2)
+      .to("#gmResults", { autoAlpha: 1, y: 0, duration: 0.3 }, 2.7)
+      .to("#fPhone", { autoAlpha: 1, left: at($("#gmResults div"), gm, "x"), top: at($("#gmResults div"), gm, "y"), duration: 0.5, ease: "power2.inOut" }, 2.95)
+      .to("#fPhone", { scale: 0.75, duration: 0.12, yoyo: true, repeat: 1 }, 3.5)
+      .to("#gmResults, #gmCaret", { autoAlpha: 0, duration: 0.2 }, 3.7)
+      .to("#fPhone", { autoAlpha: 0, duration: 0.25 }, 3.75)
+      // STEP 2: the place opens, tap Share
+      .to("#gmMap", { scale: 1.45, duration: 1.0, ease: "power2.inOut" }, 3.75)
+      .to("#gmPin", { autoAlpha: 1, y: 0, duration: 0.6, ease: "bounce.out" }, 4.4)
+      .to("#gmCard", { yPercent: 0, duration: 0.5, ease: "power3.out" }, 4.6)
+      .to("#fPhone", { autoAlpha: 1, left: at($("#gmShare"), gm, "x"), top: at($("#gmShare"), gm, "y"), duration: 0.5, ease: "power2.inOut" }, 5.2)
+      .to("#fPhone", { scale: 0.75, duration: 0.12, yoyo: true, repeat: 1 }, 5.75)
+      .call(function () { $("#gmShare").classList.add("hit"); }, null, 5.8)
+      .to("#gmScrim", { autoAlpha: 1, duration: 0.3 }, 6.0)
+      .to("#gmSheet", { yPercent: 0, duration: 0.45, ease: "power3.out" }, 6.0)
+      // STEP 3: pick AutoVerse
+      .to("#fPhone", { left: at($("#gmAv .ico"), gm, "x"), top: at($("#gmAv .ico"), gm, "y"), duration: 0.55, ease: "power2.inOut" }, 6.6)
+      .to("#fPhone", { scale: 0.75, duration: 0.12, yoyo: true, repeat: 1 }, 7.2)
+      .call(function () { $("#gmAv").classList.add("hit"); }, null, 7.25)
+      .to("#fPhone", { autoAlpha: 0, duration: 0.2 }, 7.35)
+      .call(function () { p0 = px($("#gmAv .ico")); p1 = px(scr); fly.t = 0; flyUpdate(); }, null, 7.4)
+      .to("#packet", { autoAlpha: 1, duration: 0.15 }, 7.4)
+      .to("#gmSheet", { yPercent: 110, duration: 0.4 }, 7.5).to("#gmScrim", { autoAlpha: 0, duration: 0.3 }, 7.5)
+      .to(fly, { t: 1, duration: 1.1, ease: "power2.inOut", onUpdate: flyUpdate }, 7.5)
+      .to("#packet", { autoAlpha: 0, scale: 2, duration: 0.3 }, 8.6)
+      // STEP 4: the route opens in the car
+      .to("#cuToast", { autoAlpha: 1, y: 0, duration: 0.35 }, 8.7)
+      .to("#cuSearch", { autoAlpha: 0, duration: 0.3 }, 8.8)
+      .fromTo("#cuPin", { autoAlpha: 0, scale: 0, svgOrigin: "520 98" }, { autoAlpha: 1, scale: 1, duration: 0.5, ease: "back.out(3)" }, 8.95)
+      .to([route, routeCase], { strokeDashoffset: 0, duration: 1.2, ease: "power1.inOut" }, 9.1)
+      .to("#cuToast", { autoAlpha: 0, duration: 0.3 }, 10.0)
+      .to("#cuCard", { autoAlpha: 1, y: 0, duration: 0.45, ease: "power3.out" }, 10.2)
+      .to("#fCar", { autoAlpha: 1, left: at($("#cuStart"), scr, "x"), top: at($("#cuStart"), scr, "y"), duration: 0.55, ease: "power2.inOut" }, 10.8)
+      .to("#fCar", { scale: 0.75, duration: 0.12, yoyo: true, repeat: 1 }, 11.4)
+      .call(function () { $("#cuStart").classList.add("hit"); }, null, 11.45)
+      .to("#fCar", { autoAlpha: 0, duration: 0.25 }, 11.55)
+      .to("#cuCard", { autoAlpha: 0, y: 20, duration: 0.3 }, 11.65)
+      .to("#cuTurn", { autoAlpha: 1, x: 0, duration: 0.45, ease: "power3.out" }, 11.8)
+      .to("#cuEta", { autoAlpha: 1, y: 0, duration: 0.45, ease: "power3.out" }, 11.85)
+      .to("#demoStage", { opacity: 0, duration: 0.45 }, 14.2);
+    window.addEventListener("resize", function () { tl.invalidate(); });
 
-  if (reduce) { words.forEach(function (w) { w.classList.add("lit"); }); routes.forEach(function (el) { el.style.strokeDashoffset = 0; }); setPacket(1); return; }
+    var playBtn = $("#demoPlay"), icon = $("#demoIcon"), userPaused = reduce, visible = false;
+    var PAUSE_I = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>', PLAY_I = '<path d="M8 5v14l11-7z"/>';
+    function sync() { var run = visible && !userPaused; if (run) tl.play(); else tl.pause(); icon.innerHTML = userPaused ? PLAY_I : PAUSE_I; playBtn.setAttribute("aria-label", userPaused ? "Play the demo" : "Pause the demo"); }
+    playBtn.addEventListener("click", function () { userPaused = !userPaused; sync(); });
+    // Reduced motion: start on the finished frame; the viewer can press play.
+    tl.progress(0); if (reduce) { tl.seek(13.5); }
+    paintSteps(tl.time());
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (es) { es.forEach(function (e) { visible = e.isIntersecting; sync(); }); }, { threshold: 0.35 }).observe($("#demo"));
+    } else { visible = true; sync(); }
+    sync();
+  })();
+
+  if (reduce) { words.forEach(function (w) { w.classList.add("lit"); }); return; }
 
   /* ---- everything below is big motion ---- */
   // Smooth scrolling, synced with the scroll animations.
