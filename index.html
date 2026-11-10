@@ -13,7 +13,7 @@
 <link rel="icon" type="image/png" href="img/mark.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&family=Noto+Sans+Devanagari:wght@500;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&family=Noto+Sans+Devanagari:wght@500;700;800&family=Montserrat:wght@800&family=Sacramento&display=swap">
 <style>
 /* Concept: one night drive, then sunrise. The hero IS the app's navigation view, simulated live;
    features slide past like signboards (horizontal); the page turns to day for the India chapter. */
@@ -391,8 +391,28 @@ summary::after { content: "+"; font-family: var(--mono); color: var(--route); fo
 details[open] summary::after { transform: rotate(45deg); }
 details p { padding: 0 22px 20px; color: var(--muted); max-width: 70ch; }
 
-footer { border-top: 1px solid var(--line); padding-block: 34px; color: var(--faint); font-size: 14px; }
-footer .wrap { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center; }
+footer { border-top: 1px solid var(--line); padding-block: clamp(40px, 6vw, 72px) 34px; color: var(--faint); font-size: 14px; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 28px; justify-content: space-between; align-items: flex-end; }
+/* coded logo: infinity mark + wordmark, signed "by HVT" underneath */
+.sigbrand { display: inline-grid; justify-items: end; }
+.logo { display: flex; align-items: center; gap: 14px; text-decoration: none; }
+.logo-mark { width: clamp(70px, 6.4vw, 96px); height: auto; overflow: visible; }
+.logo-word { font-family: "Montserrat", var(--display); font-weight: 800; font-size: clamp(28px, 3vw, 40px); line-height: 1; letter-spacing: -0.01em; }
+.logo-word .a { color: #2F86F6; }
+.logo-word .v { background: linear-gradient(180deg, #E6E9ED 10%, #9AA0A8 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.sigbrand { display: grid; justify-items: end; width: max-content; }
+.sig { position: relative; display: flex; align-items: center; gap: 8px; margin-top: -2px; padding-right: 2px; color: #D8DBDF; transform: rotate(-6deg); transform-origin: right center; }
+.sig .dash { width: clamp(22px, 2.2vw, 30px); height: 1.6px; border-radius: 2px; background: currentColor; opacity: .85; transform: translateY(5px); }
+.sig-text { font-family: "Sacramento", "Segoe Script", "Brush Script MT", cursive; font-size: clamp(30px, 2.9vw, 40px); line-height: 1; padding: 6px 4px 0 2px; clip-path: inset(-20% 0 -40% 0); }
+.swash { position: absolute; left: 34%; width: 66%; bottom: -7px; height: 12px; overflow: visible; }
+.swash path { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-dasharray: 300; stroke-dashoffset: 0; }
+.sig.ready .sig-text { clip-path: inset(-20% 100% -40% 0); }
+.sig.ready .swash path { stroke-dashoffset: 300; }
+.sig.ready.write .sig-text { clip-path: inset(-20% 0 -40% 0); transition: clip-path 1.3s cubic-bezier(.6,.1,.3,1) .2s; }
+.sig.ready.write .swash path { stroke-dashoffset: 0; transition: stroke-dashoffset .7s ease-out 1.3s; }
+.foot-meta { display: grid; gap: 8px; justify-items: end; text-align: right; }
+.foot-meta a { color: var(--muted); }
+@media (max-width: 720px) { footer .wrap { flex-direction: column; align-items: flex-start; } .foot-meta { justify-items: start; text-align: left; } }
 
 @media (prefers-reduced-motion: reduce) {
   .marquee-track, .bars i { animation: none; }
@@ -830,11 +850,27 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space
   </div>
 </section>
 
-<footer>
+<footer id="footer">
   <div class="wrap">
-    <a class="brand" href="#top"><img src="img/mark.png" alt=""><span><b>Auto</b>Verse</span></a>
-    <span>Map data © OpenStreetMap contributors · Tiles by OpenFreeMap</span>
-    <a href="https://github.com/itripathiharsh/AutoVerse" target="_blank" rel="noopener">Source code on GitHub</a>
+    <div class="sigbrand">
+      <a class="logo" href="#top" aria-label="AutoVerse, back to top">
+        <svg class="logo-mark" viewBox="0 0 150 64" aria-hidden="true">
+          <defs><linearGradient id="infGrad" x1="0" x2="1"><stop offset="0" stop-color="#1F7BF2"/><stop offset=".47" stop-color="#3A8BF4"/><stop offset=".53" stop-color="#B9BEC5"/><stop offset="1" stop-color="#E2E5E9"/></linearGradient></defs>
+          <path d="M75 32 C90 8 128 8 128 32 C128 56 90 56 75 32 C60 8 22 8 22 32 C22 56 60 56 75 32 Z" fill="none" stroke="url(#infGrad)" stroke-width="15" stroke-linejoin="round"/>
+          <path d="M75 32 C90 8 128 8 128 32 C128 56 90 56 75 32 C60 8 22 8 22 32 C22 56 60 56 75 32 Z" fill="none" stroke="#05070A" stroke-width="4.5" stroke-linejoin="round"/>
+        </svg>
+        <span class="logo-word"><span class="a">Auto</span><span class="v">Verse</span></span>
+      </a>
+      <div class="sig" id="sig" aria-label="by HVT">
+        <span class="dash" aria-hidden="true"></span>
+        <span class="sig-text">by HVT</span>
+        <svg class="swash" viewBox="0 0 200 16" preserveAspectRatio="none" aria-hidden="true"><path d="M2 14 C 50 11, 120 6, 198 2"/></svg>
+      </div>
+    </div>
+    <div class="foot-meta">
+      <a href="https://github.com/itripathiharsh/AutoVerse" target="_blank" rel="noopener">Source code on GitHub</a>
+      <span>Map data © OpenStreetMap contributors · Tiles by OpenFreeMap</span>
+    </div>
   </div>
 </footer>
 
@@ -857,6 +893,13 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space
   var nav = document.getElementById("nav");
   function onScroll() { nav.classList.toggle("solid", window.scrollY > 20); }
   window.addEventListener("scroll", onScroll, { passive: true }); onScroll();
+
+  /* ---------- footer signature writes itself when it comes into view ---------- */
+  var sig = document.getElementById("sig");
+  if (!reduce && "IntersectionObserver" in window) {
+    sig.classList.add("ready");
+    new IntersectionObserver(function (es, o) { es.forEach(function (e) { if (e.isIntersecting) { sig.classList.add("write"); o.disconnect(); } }); }, { threshold: 0.6 }).observe(sig);
+  }
 
   /* ---------- cursor spotlight in the hero ---------- */
   var spot = document.getElementById("spot"), hero = document.getElementById("top");
